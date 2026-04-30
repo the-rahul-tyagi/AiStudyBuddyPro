@@ -1,0 +1,6 @@
+streamlit>=1.32.0
+google-generativeai>=0.3.0
+python-dotenv>=1.0.0
+Pillow>=10.0.0  # For image processing
+pdfkit>=1.0.0  # For PDF generation
+pygments>=2.15.0  # For code syntax highlighting
