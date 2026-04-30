@@ -353,10 +353,16 @@ st.markdown("""
     }
     
     /* Main container */
-    .main {
+    [data-testid="stAppViewContainer"], .main {
         max-width: 1600px;
         padding: 0;
-        background: var(--light-bg);
+        background-color: var(--light-bg) !important;
+        color: var(--text-dark) !important;
+    }
+    
+    /* Header background to match */
+    [data-testid="stHeader"] {
+        background-color: var(--light-bg) !important;
     }
     
     /* Sidebar */
@@ -773,61 +779,75 @@ st.markdown("""
         border: none;
     }
 
-    /* --- Sidebar Enhancements --- */
+    /* --- Sidebar Enhancements - Professional Light Theme --- */
     [data-testid="stSidebar"] {
-        background: #f8fafc;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
         border-right: 1px solid #e2e8f0;
-        padding: 1.5rem 1rem;
+        padding: 2rem 1rem;
     }
-
-    .sidebar-header {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
+    
+    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] .stMarkdown h1, 
+    [data-testid="stSidebar"] .stMarkdown h2, 
+    [data-testid="stSidebar"] .stMarkdown h3 {
+        color: #0f172a !important;
     }
-
-    .sidebar-header .icon {
-        font-size: 2rem;
-        color: var(--accent);
+    
+    [data-testid="stSidebar"] hr {
+        border-color: #e2e8f0;
+        margin: 2rem 0;
     }
 
     [data-testid="stSidebar"] .stExpander {
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
-        background: white !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        margin-bottom: 1rem;
     }
 
     [data-testid="stSidebar"] .stExpander > details > summary {
-        font-weight: 600;
-        font-size: 1rem;
-        color: #334155;
-        padding: 0.75rem 1rem !important;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #0f172a !important;
+        padding: 1rem !important;
     }
     
+    /* Make labels in sidebar visible */
+    [data-testid="stSidebar"] label {
+        color: #334155 !important;
+        font-weight: 600;
+    }
+    
+    /* Inputs in sidebar */
+    [data-testid="stSidebar"] input, 
+    [data-testid="stSidebar"] textarea, 
+    [data-testid="stSidebar"] select,
+    [data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+    }
+
     [data-testid="stSidebar"] .stButton > button {
-        background: var(--accent);
-        color: white;
+        background: #3b82f6;
+        color: white !important;
         width: 100%;
-        border-radius: 8px;
+        border-radius: 12px;
+        border: 1px solid #60a5fa;
+        font-weight: 700;
+        padding: 0.8rem;
     }
     
     [data-testid="stSidebar"] .stButton > button:hover {
-        background: var(--accent-hover);
-    }
-
-    .sidebar-footer {
-        text-align: center;
-        margin-top: 2rem;
-        font-size: 0.8rem;
-        color: #94a3b8;
+        background: #2563eb;
+        border-color: #3b82f6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
     
+    /* Main Headings */
     h1, h2, h3, h4, h5, h6 {
         color: var(--text-dark);
         font-weight: 700;
@@ -889,125 +909,121 @@ st.markdown("""
 # ====================== SIDEBAR ======================
 with st.sidebar:
     st.markdown("""
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-        <h2 style="color: #6366f1; margin: 0; font-size: 1.8rem;">⚙️ Settings</h2>
-        <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.9rem;">Personalize your learning</p>
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: #2563eb; font-weight: 800; font-size: 1.8rem; margin: 0;">
+            ⚙️ Setup
+        </h2>
+        <p style="color: #64748b; font-size: 0.95rem; margin-top: 0.4rem;">
+            Personalize your study path
+        </p>
     </div>
     """, unsafe_allow_html=True)
-    st.divider()
     
-    # Gamification status with enhanced styling
-    with st.expander("🏆 **Your Achievement Stats**", expanded=True):
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05)); 
-                    border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+    # Study Subject (Primary focus so we pull it up top for ease of use)
+    st.markdown("<p style='color: #0f172a; font-weight: 600; margin-bottom: 0.2rem;'>🎯 Core Topic</p>", unsafe_allow_html=True)
+    study_subject = st.text_input(
+        "Subject/Topic",
+        value="Python Programming",
+        placeholder="e.g., Calculus, Biology...",
+        label_visibility="collapsed",
+        help="What do you want to learn today?"
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Simplified Gamification widget
+    with st.expander("🏆 **Your Stats**", expanded=True):
+        st.markdown(f"""
+        <div style="display: flex; justify-content: space-between; text-align: center; background: rgba(255, 255, 255, 0.8); padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div>
+                <strong style="color: #2563eb; font-size: 1.2rem;">{st.session_state.gamification["points"]} XP</strong><br>
+                <small style="color: #64748b;">Score</small>
+            </div>
+            <div style="border-left: 1px solid rgba(0, 0, 0, 0.05);"></div>
+            <div>
+                <strong style="color: #ef4444; font-size: 1.2rem;">{st.session_state.gamification["streak"]} 🔥</strong><br>
+                <small style="color: #64748b;">Streak</small>
+            </div>
+        </div>
         """, unsafe_allow_html=True)
         
-        col1, col2 = st.columns(2, gap="small")
-        with col1:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 1rem; background: white; border-radius: 10px; border: 2px solid #e2e8f0;">
-                <div class="points-display" style="display: block; margin-bottom: 0.5rem;">
-                    {st.session_state.gamification["points"]} XP
-                </div>
-                <small style="color: #64748b; font-weight: 600;">Total Points</small>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""
-            <div style="text-align: center; padding: 1rem; background: white; border-radius: 10px; border: 2px solid #e2e8f0;">
-                <div class="streak-display" style="display: block; margin-bottom: 0.5rem;">
-                    {st.session_state.gamification["streak"]} 🔥
-                </div>
-                <small style="color: #64748b; font-weight: 600;">Day Streak</small>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("", unsafe_allow_html=True)
-        
-        # XP progress
         level = st.session_state.gamification["points"] // 100
         xp_progress = st.session_state.gamification["points"] % 100
         st.markdown(f"""
-        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(99, 102, 241, 0.2);">
-            <small style="font-weight: 600; color: #1e293b;">Level {level + 1}</small>
-            <div class="xp-bar" style="margin: 0.75rem 0 0.5rem 0;">
-                <div class="xp-progress" style="width: {xp_progress}%"></div>
+        <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                <small style="color: #0f172a; font-weight: 600;">Level {level + 1}</small>
+                <small style="color: #64748b;">{xp_progress}/100 XP to Level {level + 2}</small>
             </div>
-            <small style="color: #64748b;">{xp_progress}/100 XP to next level</small>
+            <div style="height: 8px; background: rgba(0, 0, 0, 0.05); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="width: {xp_progress}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 4px;"></div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    with st.expander("📌 **Study Setup**", expanded=True):
-        st.markdown("<small style='color: #64748b; font-weight: 600;'>Quick setup (all optional)</small>", unsafe_allow_html=True)
+
+    with st.expander("📋 **Learning Profile**", expanded=False):
+        st.markdown("<small style='color: #64748b;'>Customize how AI teaches you</small>", unsafe_allow_html=True)
         
-        col1, col2 = st.columns([2, 1])
-        with col1:
-            study_subject = st.text_input(
-                "Subject/Topic",
-                value="Python Programming",
-                placeholder="e.g., Calculus, Biology",
-                label_visibility="collapsed"
-            )
-        with col2:
-            education_level = st.selectbox(
-                "Level",
-                ["High School", "Undergraduate", "Graduate", "Professional"],
-                index=1,
-                label_visibility="collapsed"
-            )
+        education_level = st.selectbox(
+            "Education Level",
+            ["High School", "Undergraduate", "Graduate", "Professional"],
+            index=1,
+            help="Adapts the complexity of the materials."
+        )
         
         learning_style = st.selectbox(
             "Learning Style",
             ["Visual", "Auditory", "Reading/Writing", "Kinesthetic", "Mixed"],
             index=0,
-            label_visibility="collapsed"
+            help="Tailors how information is presented."
         )
+        
         response_length = st.select_slider(
             "Response Detail",
             ["Concise", "Balanced", "Detailed"],
-            "Balanced",
-            label_visibility="collapsed"
+            "Balanced"
         )
-    
-    with st.expander("🎯 **Advanced Options**", expanded=False):
-        st.markdown("<small style='color: #64748b; font-weight: 600;'>Optional: Customize your learning</small>", unsafe_allow_html=True)
+        
         study_goals = st.text_area(
-            "Specific objectives?",
-            height=60,
-            placeholder="e.g., Master functions and loops",
-            label_visibility="collapsed"
+            "Specific Objectives",
+            height=68,
+            placeholder="e.g., Master loops for my final exam...",
+            help="Any specific goals to steer the content generation?"
         )
-        proficiency_level = st.slider("Current Level", 1, 10, 5, label_visibility="collapsed")
-        target_proficiency = st.slider("Target Level", 1, 10, 8, label_visibility="collapsed")
+
+    with st.expander("📈 **Proficiency Tracking**", expanded=False):
+        proficiency_level = st.slider("Current Level (1-10)", 1, 10, 5, help="Where are you currently at?")
+        target_proficiency = st.slider("Target Level (1-10)", 1, 10, 8, help="Where do you want to be?")
         
         progress_percent = min(100, int((proficiency_level / target_proficiency) * 100)) if target_proficiency > 0 else 0
         st.markdown(f"""
-        <div class="xp-bar" style="margin: 0.75rem 0;">
-            <div class="xp-progress" style="width: {progress_percent}%;"></div>
+        <div style="margin-top: 0.5rem;">
+            <small style="color: #64748b; font-weight: 600;">Goal Progress: {progress_percent}%</small>
+            <div style="height: 6px; background: rgba(0, 0, 0, 0.05); border-radius: 3px; overflow: hidden; margin-top: 0.2rem;">
+                <div style="width: {progress_percent}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 3px;"></div>
+            </div>
         </div>
-        <small style="color: #64748b; font-weight: 600;">{progress_percent}% to goal</small>
         """, unsafe_allow_html=True)
     
-    st.divider()
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("<p style='color: #334155; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;'>ACTIONS</p>", unsafe_allow_html=True)
     
     col_btn_1, col_btn_2 = st.columns(2, gap="small")
     with col_btn_1:
-        if st.button("🧹 Clear Chat", use_container_width=True):
+        if st.button("🧹 Clear Chat", use_container_width=True, help="Wipes the current AI conversation history."):
             st.session_state.chat_session = model.start_chat(history=[])
             st.toast("✅ Chat history cleared!", icon="🧹")
             st.rerun()
-    
     with col_btn_2:
-        if st.button("🔄 Reset Stats", use_container_width=True):
+        if st.button("🔄 Reset Stats", use_container_width=True, help="Resets gamification points and streaks back to zero."):
             st.session_state.gamification["points"] = 0
             st.session_state.gamification["badges"] = []
             st.session_state.gamification["streak"] = 0
             st.toast("✅ Stats reset!", icon="🔄")
             st.rerun()
 
-    if st.button("🗑️ Clear All Content", use_container_width=True):
+    if st.button("🗑️ Clear All Generated Content", use_container_width=True, help="Removes all generated quizzes, study guides, and flashcards."):
         st.session_state.study_materials = []
         st.session_state.practice_tests = []
         st.session_state.flashcards = []
@@ -1015,21 +1031,18 @@ with st.sidebar:
         st.toast("🗑️ All generated content cleared!", icon="🗑️")
         st.rerun()
     
-    st.divider()
-    
     st.markdown("""
-    <div style="text-align: center; margin-top: 2.5rem; padding: 1.5rem; 
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
-                border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.2);">
-        <small style="color: #64748b; font-weight: 600; display: block; margin-bottom: 0.5rem;">
-            📱 AI Study Buddy Pro v2.1
+    <div style="text-align: center; margin-top: 2rem; padding: 1.2rem; 
+                background: rgba(0, 0, 0, 0.02);
+                border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.05);">
+        <small style="color: #0f172a; font-weight: 700; font-size: 0.95rem;">
+            📱 AI Study Buddy Pro
         </small>
-        <small style="color: #94a3b8; display: block; margin-bottom: 0.25rem;">
-            ⚡ Powered by Gemini 1.5 Pro
-        </small>
-        <small style="color: #94a3b8;">
-            🚀 Advanced Learning Technology
-        </small>
+        <div style="margin-top: 0.5rem;">
+            <span style="background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                Gemini Powered
+            </span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
