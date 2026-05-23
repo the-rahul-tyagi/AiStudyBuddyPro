@@ -69,6 +69,15 @@ resource "aws_security_group" "aistudybuddy_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Inbound: Allow Jenkins Dashboard
+  ingress {
+    description = "Jenkins Dashboard"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Outbound: Allow the server to download updates and pull from GitHub/Docker
   egress {
     description = "Allow all outbound traffic"
