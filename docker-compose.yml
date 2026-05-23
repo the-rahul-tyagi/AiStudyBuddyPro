@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  aistudybuddypro:
+    build: .
+    container_name: aistudybuddy_app
+    ports:
+      - "8501:8501"
+    volumes:
+      # This is crucial! It mounts your local database file to the container so data isn't lost on restart
+      - ./study_buddy.db:/app/study_buddy.db
+    env_file:
+      # This securely passes your Gemini API key from your local .env file into the container
+      - .env
+    restart: unless-stopped
+    
