@@ -48,3 +48,18 @@ secrets.toml
 # OS metadata
 **/.DS_Store
 **/Thumbs.db
+
+# Terraform
+terraform/
+
+# Kubernetes
+kubernetes/
+
+# Jenkins
+jenkins/
+
+# Monitoring
+monitoring/
+
+# Documentation
+README.md
