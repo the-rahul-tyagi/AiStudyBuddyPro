@@ -123,3 +123,21 @@ logs/
 # Miscellaneous
 # ==========================================
 kubernetes/secret.yaml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Sensitive files
+*.pem
+.env
+terraform.tfvars
+
+# Python
+.venv/
+__pycache__/
+
+# VS Code
+.vscode/
