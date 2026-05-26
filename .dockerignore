@@ -1,0 +1,50 @@
+# Git
+.git
+.github
+.gitignore
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints
+
+# Databases
+**/*.db
+**/*.sqlite3
+**/*.sqlite3-journal
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Environments / Credentials
+.env
+.env.*
+secrets.toml
+
+# IDEs & Editors
+.vscode/
+.idea/
+**/*.swp
+**/*~
+
+# OS metadata
+**/.DS_Store
+**/Thumbs.db
