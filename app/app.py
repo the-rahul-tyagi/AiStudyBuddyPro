@@ -12,9 +12,24 @@ import io
 import pdfkit
 import random
 
+# Import database manager
+try:
+    from database import db_manager
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from database import db_manager
+
 # ====================== CONFIGURATION ======================
 # Load environment variables
 load_dotenv()
+
+# Initialize database once
+@st.cache_resource
+def init_database():
+    db_manager.init_db()
+
+init_database()
 
 # Configure Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
@@ -100,24 +115,14 @@ BADGES = {
     "perfect_week": {"name": "Perfect Week", "desc": "Studied every day for a week", "icon": "🌟", "points": 150},
 }
 
+# Helper to save stats back to DB
+def save_stats():
+    """Helper to save gamification state to DB"""
+    db_manager.save_gamification_state(st.session_state.gamification)
+
 # Initialize gamification state
 if "gamification" not in st.session_state:
-    st.session_state.gamification = {
-        "points": 0,
-        "badges": [],
-        "streak": 0,
-        "last_study_date": None,
-        "study_sessions_today": 0,
-        "flashcards_reviewed": 0,
-        "perfect_days": 0,
-        "leaderboard": [
-            {"name": "Alex", "points": 1250},
-            {"name": "Sam", "points": 980},
-            {"name": "Jordan", "points": 750},
-            {"name": "Taylor", "points": 620},
-            {"name": "You", "points": 0}
-        ]
-    }
+    st.session_state.gamification = db_manager.get_gamification_state()
 
 # ====================== HELPER FUNCTIONS ======================
 def update_streak():
@@ -141,6 +146,7 @@ def update_streak():
     
     st.session_state.gamification["last_study_date"] = today
     check_streak_badges()
+    save_stats()
 
 def check_streak_badges():
     """Check if user earned any streak-related badges"""
@@ -165,6 +171,7 @@ def award_points(points):
     
     # Sort leaderboard
     st.session_state.gamification["leaderboard"].sort(key=lambda x: x["points"], reverse=True)
+    save_stats()
 
 def award_badge(badge_id):
     """Award a badge to the user"""
@@ -173,6 +180,7 @@ def award_badge(badge_id):
         badge = BADGES[badge_id]
         award_points(badge["points"])
         st.toast(f"🎉 You earned the {badge['name']} badge! {badge['icon']} (+{badge['points']} points)", icon="🎖️")
+        save_stats()
 
 def check_time_based_badges():
     """Check for time-based badges (early bird/night owl)"""
@@ -215,13 +223,19 @@ def generate_study_materials(topic, level, style, goals):
     - Study Goals: {goals}
     
     Create comprehensive study materials that:
-    1. Cover key concepts in an organized manner
-    2. Are tailored to the specified learning style
-    3. Include examples and explanations
-    4. Address the student's specific goals
+    1. Cover key concepts in an organized manner.
+    2. Are tailored to the specified learning style.
+    3. Include examples and explanations.
+    4. Address the student's specific goals.
     
-    Structure the materials with clear headings and appropriate formatting.
-    Use markdown formatting for better readability.
+    Formatting Guidelines for Professional Presentation:
+    - Organize with clear heading levels (e.g. # Header 1, ## Header 2).
+    - Bold key definitions and terms upon first mention.
+    - Present comparisons, lists, or parameters in Markdown Tables (`| Header 1 | Header 2 |`) for clear structured readability.
+    - Place important takeaways or concepts inside Markdown Blockquotes (`> **Key Concept:** ...`).
+    - Use lists with bullet points (`- Item`) for step-by-step procedures.
+    - If code or formulas are required, use standard markdown syntax highlighting block format (e.g. ```python ... ``` or LaTeX).
+    - Provide a concise summary or checklist at the end.
     """
     response = st.session_state.chat_session.send_message(prompt)
     return response.text
@@ -232,6 +246,7 @@ def generate_practice_test(topic, level, style, goals):
     st.session_state.gamification["study_sessions_today"] += 1
     award_points(15)
     update_streak()
+    st.session_state.gamification["last_study_date"] = datetime.now().date()
     check_study_session_badges()
     check_time_based_badges()
     
@@ -243,13 +258,16 @@ def generate_practice_test(topic, level, style, goals):
     - Study Goals: {goals}
     
     Include:
-    1. 5-10 varied questions (multiple choice, short answer, problem-solving)
-    2. Clear instructions
-    3. Appropriate difficulty level
-    4. Answer key with explanations
+    1. 5-10 varied questions (multiple choice, short answer, problem-solving).
+    2. Clear instructions at the beginning.
+    3. Appropriate difficulty level.
+    4. Answer key with detailed explanations at the end.
     
-    Format the test professionally with clear numbering and spacing.
-    Use markdown formatting for better readability.
+    Formatting Guidelines:
+    - Organize the test clearly into sections (e.g., ## Section 1: Multiple Choice, ## Section 2: Written Response).
+    - Highlight key terms or problem variables in bold.
+    - Format code snippets or mathematical expressions cleanly.
+    - Keep the answer key separate at the bottom under a clear divider.
     """
     response = st.session_state.chat_session.send_message(prompt)
     return response.text
@@ -265,14 +283,21 @@ def evaluate_answers(question, answer):
     Question: {question}
     Answer: {answer}
     
-    Provide:
-    1. Accuracy assessment (correct/partially correct/incorrect)
-    2. Detailed feedback
-    3. Suggestions for improvement
-    4. Additional explanation if needed
+    Provide your evaluation in a highly structured layout with these sections:
     
-    Be constructive and supportive in your feedback.
-    Use markdown formatting for better readability.
+    ### 📊 Evaluation Result
+    - **Accuracy:** [Specify: Correct / Partially Correct / Incorrect]
+    
+    ### 📝 Detailed Feedback
+    [Your detailed feedback assessing the student's answer, explaining what is right/wrong.]
+    
+    ### 💡 Suggestions for Improvement
+    [Actionable, specific points on how the student can improve this answer next time.]
+    
+    ### 🔍 Additional Concept Explanation
+    [Provide a brief, clean explanation of the underlying concept to reinforce learning.]
+    
+    Be constructive, supportive, and extremely clear. Use markdown bolding, list bullets, or quotes where appropriate.
     """
     response = st.session_state.chat_session.send_message(prompt)
     
@@ -317,7 +342,7 @@ def generate_pdf(content):
 # ====================== STREAMLIT UI ======================
 # App configuration
 st.set_page_config(
-    page_title="AI Study Buddy Pro",
+    page_title="AI Study Buddy",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -326,193 +351,323 @@ st.set_page_config(
 # Custom CSS with gamification elements and enhanced modern design
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        --bg-dark: #05070f;
+        --bg-slate: #0b0f19;
+        --bg-card: rgba(13, 20, 38, 0.65);
+        --border-color: rgba(255, 255, 255, 0.06);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #818cf8;
+        --primary-glow: rgba(129, 140, 248, 0.25);
+        --accent-purple: #c084fc;
+        --accent-pink: #d946ef;
+        --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #d946ef 100%);
+        --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+        --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);
+        --gradient-info: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
-    
-    :root {
-        --primary: #0f172a;
-        --primary-light: #1e293b;
-        --accent: #3b82f6;
-        --accent-hover: #2563eb;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --light-bg: #f1f5f9;
-        --card-bg: #ffffff;
-        --border: #e2e8f0;
-        --text-dark: #0f172a;
-        --text-light: #64748b;
+
+    /* Ambient Glowing Blobs in Background with live float animations */
+    @keyframes floatBlob1 {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(40px, -60px) scale(1.1); }
+        66% { transform: translate(-20px, 30px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
     }
-    
-    html, body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-        color: var(--text-dark);
-        background: var(--light-bg);
+
+    @keyframes floatBlob2 {
+        0% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(-60px, 50px) scale(1.15); }
+        100% { transform: translate(0px, 0px) scale(1); }
     }
-    
-    /* Main container */
-    [data-testid="stAppViewContainer"], .main {
-        max-width: 1600px;
-        padding: 0;
-        background-color: var(--light-bg) !important;
-        color: var(--text-dark) !important;
+
+    @keyframes floatBlob3 {
+        0% { transform: translate(0px, 0px) scale(1); }
+        50% { transform: translate(50px, -40px) scale(0.95); }
+        100% { transform: translate(0px, 0px) scale(1); }
     }
-    
+
+    [data-testid="stAppViewContainer"]::before {
+        content: "";
+        position: absolute;
+        top: 5%;
+        left: 10%;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(0, 0, 0, 0) 70%);
+        filter: blur(80px);
+        pointer-events: none;
+        z-index: 0;
+        animation: floatBlob1 20s infinite ease-in-out;
+    }
+
+    [data-testid="stAppViewContainer"]::after {
+        content: "";
+        position: absolute;
+        bottom: 15%;
+        right: 10%;
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, rgba(217, 70, 239, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
+        filter: blur(100px);
+        pointer-events: none;
+        z-index: 0;
+        animation: floatBlob2 25s infinite ease-in-out;
+    }
+
+    .main::before {
+        content: "";
+        position: absolute;
+        top: 40%;
+        right: 20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        filter: blur(90px);
+        pointer-events: none;
+        z-index: 0;
+        animation: floatBlob3 22s infinite ease-in-out;
+    }
+
+    html, body, [data-testid="stAppViewContainer"], .main {
+        font-family: var(--font-family) !important;
+        background-color: var(--bg-dark) !important;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.2) 0px, transparent 50%),
+            radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%) !important;
+        background-attachment: fixed !important;
+        color: var(--text-main) !important;
+    }
+
     /* Header background to match */
     [data-testid="stHeader"] {
-        background-color: var(--light-bg) !important;
+        background-color: transparent !important;
     }
-    
-    /* Sidebar */
+
+    /* Sidebar container and design */
     [data-testid="stSidebar"] {
-        background: white;
-        border-right: 1px solid var(--border);
+        background: linear-gradient(180deg, #03050c 0%, #090e1a 100%) !important;
+        border-right: 1px solid var(--border-color) !important;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
     }
-    
-    /* Button styling */
+
+    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] .stMarkdown h1, 
+    [data-testid="stSidebar"] .stMarkdown h2, 
+    [data-testid="stSidebar"] .stMarkdown h3,
+    [data-testid="stSidebar"] label {
+        color: var(--text-main) !important;
+    }
+
+    [data-testid="stSidebar"] hr {
+        border-color: var(--border-color) !important;
+    }
+
+    [data-testid="stSidebar"] .stExpander {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 14px !important;
+        background: rgba(13, 20, 38, 0.6) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        margin-bottom: 1.2rem;
+    }
+
+    [data-testid="stSidebar"] .stExpander > details > summary {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-main) !important;
+        padding: 0.8rem !important;
+    }
+
+    /* Streamlit custom inputs in general */
+    input[type="text"], textarea, select, div[data-baseweb="select"] > div {
+        background-color: rgba(13, 20, 38, 0.7) !important;
+        color: var(--text-main) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        font-size: 0.95rem !important;
+        transition: var(--transition-smooth) !important;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus, div[data-baseweb="select"] > div:focus-within {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    }
+
+    /* Premium Button styling with glowing shadows */
     .stButton > button {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+        background: var(--gradient-primary) !important;
         color: white !important;
-        border: none;
-        border-radius: 8px;
-        padding: 0.7rem 1.4rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 700 !important;
+        font-size: 0.92rem !important;
+        transition: var(--transition-smooth) !important;
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3) !important;
+        cursor: pointer !important;
+        width: 100% !important;
+        letter-spacing: 0.5px !important;
     }
-    
+
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 25px rgba(217, 70, 239, 0.45) !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
     }
-    
+
     .stButton > button:active {
-        transform: translateY(0);
+        transform: translateY(-1px) !important;
     }
-    
-    /* Chat messages */
+
+    /* Chat messages bubble design */
     .chat-message {
-        padding: 1.2rem;
-        border-radius: 12px;
-        margin-bottom: 1rem;
+        padding: 1.25rem;
+        border-radius: 20px;
+        margin-bottom: 1.25rem;
+        font-size: 0.98rem;
+        line-height: 1.6;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: var(--transition-smooth);
+        animation: slideUp 0.4s ease-out;
     }
-    
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .user-message {
-        background: #dbeafe;
-        margin-left: 8%;
-        border-left: 3px solid var(--accent);
-        border-radius: 12px 12px 3px 12px;
+        background: linear-gradient(135deg, #4f46e5 0%, #d946ef 100%) !important;
+        color: white !important;
+        margin-left: 12%;
+        border-radius: 20px 20px 4px 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25) !important;
     }
-    
+
     .ai-message {
-        background: var(--card-bg);
-        margin-right: 8%;
-        border-left: 3px solid var(--text-light);
-        border-radius: 12px 12px 12px 3px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        background: rgba(13, 20, 38, 0.75) !important;
+        color: var(--text-main) !important;
+        margin-right: 12%;
+        border-radius: 20px 20px 20px 4px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-left: 4px solid var(--accent-pink) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
     }
-    
-    /* Feature cards */
+
+    /* Feature cards on dashboard */
     .feature-card {
-        background: var(--card-bg);
-        border-radius: 12px;
-        padding: 1.8rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--border);
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%), rgba(13, 20, 38, 0.7) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 20px !important;
+        padding: 2rem !important;
+        margin-bottom: 1.5rem !important;
+        transition: var(--transition-smooth) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
         position: relative;
+        overflow: hidden;
     }
-    
+
     .feature-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--accent), #60a5fa);
-        border-radius: 12px 12px 0 0;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 20px 20px 0 0;
     }
-    
+
     .feature-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.12);
-        border-color: var(--accent);
+        transform: translateY(-8px) scale(1.01) !important;
+        box-shadow: 0 20px 40px rgba(168, 85, 247, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(168, 85, 247, 0.5) !important;
     }
-    
+
     .feature-card h4 {
-        color: var(--text-dark);
-        font-size: 1.2rem;
+        color: var(--primary);
+        font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
-    
+
     .feature-card p {
-        color: var(--text-light);
+        color: var(--text-muted);
         font-size: 0.95rem;
-        line-height: 1.5;
+        line-height: 1.6;
         margin: 0;
     }
-    
-    /* Badge cards */
+
+    /* Badge cards styling */
     .badge-card {
-        background: var(--card-bg);
-        border-radius: 12px;
-        padding: 1.4rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--border);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%), rgba(13, 20, 38, 0.7) !important;
+        backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 20px !important;
+        padding: 1.4rem !important;
+        margin-bottom: 1rem !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
         display: flex;
         align-items: center;
         gap: 1.5rem;
-        transition: all 0.3s ease;
+        transition: var(--transition-smooth) !important;
     }
-    
+
     .badge-card:hover {
-        border-color: var(--accent);
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+        border-color: var(--accent-purple) !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        box-shadow: 0 16px 32px rgba(217, 70, 239, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.22) !important;
     }
-    
+
     .badge-icon {
         font-size: 2.5rem;
         flex-shrink: 0;
     }
-    
+
     .badge-info {
         flex-grow: 1;
     }
-    
+
     .badge-title {
-        color: var(--text-dark);
+        color: var(--text-main);
         font-weight: 700;
         margin: 0;
         font-size: 1rem;
     }
-    
+
     .badge-description {
-        color: var(--text-light);
+        color: var(--text-muted);
         font-size: 0.85rem;
         margin: 0.3rem 0 0 0;
     }
-    
-    /* Points and streak display */
+
+    /* Points and streak badge display */
     .points-display {
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        background: var(--gradient-primary);
         color: white;
         padding: 0.7rem 1.4rem;
         border-radius: 50px;
         font-weight: 700;
         display: inline-block;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3);
         font-size: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
+
     .streak-display {
         background: linear-gradient(135deg, #f59e0b, #ec4899);
         color: white;
@@ -520,107 +675,113 @@ st.markdown("""
         border-radius: 50px;
         font-weight: 700;
         display: inline-block;
-        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
         font-size: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
-    /* Leaderboard */
+
+    /* Leaderboard container and elements */
     .leaderboard-entry {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid var(--border);
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        background: transparent;
+        padding: 1.1rem;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 14px !important;
+        transition: var(--transition-smooth) !important;
+        background: rgba(13, 20, 38, 0.45) !important;
+        margin-bottom: 0.75rem;
     }
-    
+
     .leaderboard-entry:hover {
-        background: var(--light-bg);
-        transform: translateX(4px);
+        background: rgba(22, 28, 45, 0.65) !important;
+        transform: translateX(8px) !important;
+        border-color: rgba(168, 85, 247, 0.45) !important;
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15) !important;
     }
-    
+
     .leaderboard-you {
-        background: #dbeafe;
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.3) 0%, rgba(217, 70, 239, 0.15) 100%) !important;
+        border: 1px solid rgba(217, 70, 239, 0.5) !important;
         font-weight: 700;
-        border-left: 3px solid var(--accent);
-        padding-left: 0.75rem;
+        padding-left: 1.2rem !important;
+        box-shadow: 0 4px 20px rgba(217, 70, 239, 0.2) !important;
     }
-    
+
     /* Progress bar */
     .xp-bar {
         height: 10px;
-        background-color: var(--border);
+        background-color: rgba(255, 255, 255, 0.05);
         border-radius: 10px;
         margin: 1rem 0;
         overflow: hidden;
     }
-    
+
     .xp-progress {
         height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+        background: var(--gradient-primary);
         border-radius: 10px;
-        box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 12px rgba(217, 70, 239, 0.6);
     }
-    
-    /* Flashcard container */
+
+    /* 3D Flashcard Design */
     .flashcard-container {
-        perspective: 1000px;
-        margin: 2rem auto;
+        perspective: 1200px;
+        margin: 2.5rem auto;
         width: 100%;
         max-width: 600px;
     }
-    
+
     .flashcard {
         position: relative;
         width: 100%;
-        height: 320px;
+        height: 330px;
         transform-style: preserve-3d;
-        transition: transform 0.6s ease;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 24px;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
         cursor: pointer;
     }
-    
+
     .flashcard:hover {
-        box-shadow: 0 15px 40px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 25px 50px rgba(168, 85, 247, 0.3);
     }
-    
+
     .flashcard.flipped {
         transform: rotateY(180deg);
     }
-    
+
     .flashcard-face {
         position: absolute;
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
-        border-radius: 16px;
+        border-radius: 24px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 2rem;
+        padding: 2.5rem;
         box-sizing: border-box;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
     }
-    
+
     .flashcard-front {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-        color: white;
+        background: linear-gradient(135deg, #0f1026 0%, #3b145a 60%, #701a75 100%) !important;
+        color: var(--text-main);
         transform: rotateY(0deg);
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: inset 0 2px 20px rgba(255, 255, 255, 0.05);
     }
-    
+
     .flashcard-back {
-        background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
-        color: white;
+        background: linear-gradient(135deg, #011c16 0%, #043e2e 60%, #065f46 100%) !important;
+        color: var(--text-main);
         transform: rotateY(180deg);
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: inset 0 2px 20px rgba(255, 255, 255, 0.05);
     }
-    
+
     .flashcard-content {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         text-align: center;
         overflow-y: auto;
         max-height: 85%;
@@ -628,47 +789,42 @@ st.markdown("""
         line-height: 1.6;
         font-weight: 500;
     }
-    
-    /* Flashcard navigation */
+
+    /* Flashcard controls */
     .flashcard-nav-btn {
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        background: var(--gradient-primary);
         color: white;
-        border: none;
-        padding: 0.7rem 1.6rem;
-        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        padding: 0.8rem 1.8rem;
+        border-radius: 12px;
         font-size: 0.95rem;
         cursor: pointer;
         font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        transition: var(--transition-smooth);
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);
     }
-    
+
     .flashcard-nav-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 8px 25px rgba(217, 70, 239, 0.45);
     }
-    
-    .flashcard-nav-btn:active {
-        transform: translateY(0);
-    }
-    
-    /* Flashcard progress */
+
     .flashcard-progress {
         width: 100%;
         max-width: 600px;
         margin: 1.5rem auto;
     }
-    
+
     .flashcard-set-header {
         text-align: center;
         margin-bottom: 2rem;
         padding: 1.5rem;
-        background: var(--card-bg);
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        background: var(--bg-card);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
-    
+
     .flashcard-actions {
         display: flex;
         justify-content: center;
@@ -676,232 +832,127 @@ st.markdown("""
         margin-top: 1.5rem;
         flex-wrap: wrap;
     }
-    
+
     .flashcard-tag {
         display: inline-block;
-        background: var(--light-bg);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-color);
         padding: 0.4rem 1rem;
         border-radius: 50px;
         font-size: 0.85rem;
         margin: 0.4rem;
         font-weight: 600;
-        color: var(--text-dark);
-        transition: all 0.3s ease;
+        color: var(--text-main);
+        transition: var(--transition-smooth);
     }
-    
+
     .flashcard-tag:hover {
-        background: var(--accent);
+        background: var(--primary);
         color: white;
-        border-color: var(--accent);
+        border-color: var(--primary);
         transform: scale(1.05);
     }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .main {
-            padding: 0.75rem;
-        }
-        
-        .user-message {
-            margin-left: 5%;
-        }
-        
-        .ai-message {
-            margin-right: 5%;
-        }
-        
-        .feature-card {
-            padding: 1.2rem;
-        }
-        
-        .flashcard-container {
-            margin: 1.5rem auto;
-        }
-        
-        .flashcard {
-            height: 280px;
-        }
-        
-        .flashcard-face {
-            padding: 1.5rem;
-        }
-        
-        .flashcard-actions {
-            gap: 0.8rem;
-        }
-        
-        .flashcard-nav-btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.85rem;
-        }
-    }
-    
-    /* Scrollbar styling */
+
+    /* Custom Scrollbars */
     ::-webkit-scrollbar {
-        width: 10px;
+        width: 8px;
+        height: 8px;
     }
-    
+
     ::-webkit-scrollbar-track {
-        background: var(--light-bg);
+        background: var(--bg-dark);
     }
-    
+
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, var(--accent), var(--accent-hover));
-        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+        transition: var(--transition-smooth);
     }
-    
+
     ::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-hover);
+        background: var(--primary);
     }
-    
-    /* Tab styling */
+
+    /* Streamlit Custom Tab design */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0.5rem;
-        border-bottom: 2px solid var(--border);
-        padding: 0 1rem;
+        gap: 0.75rem;
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 0.5rem 1rem;
+        background: rgba(13, 20, 38, 0.45) !important;
+        border-radius: 14px !important;
+        margin-bottom: 1.5rem;
     }
-    
+
     .stTabs [data-baseweb="tab"] {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px 8px 0 0;
-        background: transparent;
-        border: none;
-        color: var(--text-light);
-        font-weight: 600;
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
+        padding: 0.75rem 1.5rem !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        border: none !important;
+        color: var(--text-muted) !important;
+        font-weight: 600 !important;
+        transition: var(--transition-smooth) !important;
+        font-size: 0.95rem !important;
     }
-    
+
+    .stTabs [data-baseweb="tab"]:hover {
+        color: var(--text-main) !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+    }
+
     .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: var(--accent);
-        color: white;
-        border: none;
-    }
-
-    /* --- Sidebar Enhancements - Professional Light Theme --- */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-        border-right: 1px solid #e2e8f0;
-        padding: 2rem 1rem;
-    }
-    
-    [data-testid="stSidebar"] .stMarkdown p, 
-    [data-testid="stSidebar"] .stMarkdown h1, 
-    [data-testid="stSidebar"] .stMarkdown h2, 
-    [data-testid="stSidebar"] .stMarkdown h3 {
-        color: #0f172a !important;
-    }
-    
-    [data-testid="stSidebar"] hr {
-        border-color: #e2e8f0;
-        margin: 2rem 0;
-    }
-
-    [data-testid="stSidebar"] .stExpander {
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.8) !important;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        margin-bottom: 1rem;
-    }
-
-    [data-testid="stSidebar"] .stExpander > details > summary {
-        font-weight: 700;
-        font-size: 1.05rem;
-        color: #0f172a !important;
-        padding: 1rem !important;
-    }
-    
-    /* Make labels in sidebar visible */
-    [data-testid="stSidebar"] label {
-        color: #334155 !important;
-        font-weight: 600;
-    }
-    
-    /* Inputs in sidebar */
-    [data-testid="stSidebar"] input, 
-    [data-testid="stSidebar"] textarea, 
-    [data-testid="stSidebar"] select,
-    [data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-    }
-
-    [data-testid="stSidebar"] .stButton > button {
-        background: #3b82f6;
+        background: var(--gradient-primary) !important;
         color: white !important;
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid #60a5fa;
-        font-weight: 700;
-        padding: 0.8rem;
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4) !important;
     }
-    
-    [data-testid="stSidebar"] .stButton > button:hover {
-        background: #2563eb;
-        border-color: #3b82f6;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+
+    /* Streamlit Expander styling overrides */
+    .streamlit-expanderHeader {
+        border-radius: 14px !important;
+        background: rgba(13, 20, 38, 0.6) !important;
+        border: 1px solid var(--border-color) !important;
+        transition: var(--transition-smooth) !important;
+        padding: 1rem 1.25rem !important;
+        font-weight: 600 !important;
+        color: var(--text-main) !important;
     }
-    
-    /* Main Headings */
-    h1, h2, h3, h4, h5, h6 {
-        color: var(--text-dark);
-        font-weight: 700;
+
+    .streamlit-expanderHeader:hover {
+        background: rgba(22, 28, 45, 0.8) !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 4px 20px var(--primary-glow) !important;
+    }
+
+    .streamlit-expanderContent {
+        border-radius: 0 0 14px 14px !important;
+        border: 1px solid var(--border-color) !important;
+        border-top: none !important;
+        background: rgba(13, 20, 38, 0.4) !important;
+        padding: 1.5rem !important;
+        color: var(--text-main) !important;
+    }
+
+    /* Radiant multi-color text gradients for title headings */
+    h1, h2, h3 {
+        background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 30%, #c084fc 70%, #d946ef 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        font-weight: 800 !important;
         letter-spacing: -0.3px;
     }
-    
+
     h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        color: var(--text-dark);
+        font-size: 2.7rem !important;
+        margin-bottom: 1.5rem !important;
     }
-    
+
     h2 {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
+        font-size: 1.95rem !important;
+        margin-bottom: 1.1rem !important;
     }
-    
+
     h3 {
-        font-size: 1.4rem;
-        margin-bottom: 0.8rem;
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        border-radius: 8px;
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        transition: all 0.3s ease;
-        padding: 1rem;
-        font-weight: 600;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        background: var(--light-bg);
-        border-color: var(--accent);
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-    }
-    
-    /* Input styling */
-    .stTextInput, .stTextArea, .stSelectbox, .stSlider, .stNumberInput {
-        transition: all 0.3s ease;
-    }
-    
-    input[type="text"], textarea, select {
-        border-radius: 8px !important;
-        border: 1px solid var(--border) !important;
-        padding: 0.6rem !important;
-        font-size: 0.95rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    input[type="text"]:focus, textarea:focus, select:focus {
-        border-color: var(--accent) !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        font-size: 1.45rem !important;
+        margin-bottom: 0.9rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -910,17 +961,17 @@ st.markdown("""
 with st.sidebar:
     st.markdown("""
     <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="color: #2563eb; font-weight: 800; font-size: 1.8rem; margin: 0;">
+        <h2 style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.8rem; margin: 0;">
             ⚙️ Setup
         </h2>
-        <p style="color: #64748b; font-size: 0.95rem; margin-top: 0.4rem;">
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.4rem;">
             Personalize your study path
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     # Study Subject (Primary focus so we pull it up top for ease of use)
-    st.markdown("<p style='color: #0f172a; font-weight: 600; margin-bottom: 0.2rem;'>🎯 Core Topic</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: var(--text-main); font-weight: 600; margin-bottom: 0.2rem;'>🎯 Core Topic</p>", unsafe_allow_html=True)
     study_subject = st.text_input(
         "Subject/Topic",
         value="Python Programming",
@@ -934,15 +985,15 @@ with st.sidebar:
     # Simplified Gamification widget
     with st.expander("🏆 **Your Stats**", expanded=True):
         st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; text-align: center; background: rgba(255, 255, 255, 0.8); padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; text-align: center; background: rgba(17, 24, 39, 0.5); padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
             <div>
-                <strong style="color: #2563eb; font-size: 1.2rem;">{st.session_state.gamification["points"]} XP</strong><br>
-                <small style="color: #64748b;">Score</small>
+                <strong style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem;">{st.session_state.gamification["points"]} XP</strong><br>
+                <small style="color: var(--text-muted);">Score</small>
             </div>
-            <div style="border-left: 1px solid rgba(0, 0, 0, 0.05);"></div>
+            <div style="border-left: 1px solid var(--border-color);"></div>
             <div>
                 <strong style="color: #ef4444; font-size: 1.2rem;">{st.session_state.gamification["streak"]} 🔥</strong><br>
-                <small style="color: #64748b;">Streak</small>
+                <small style="color: var(--text-muted);">Streak</small>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -952,17 +1003,17 @@ with st.sidebar:
         st.markdown(f"""
         <div style="margin-top: 1rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
-                <small style="color: #0f172a; font-weight: 600;">Level {level + 1}</small>
-                <small style="color: #64748b;">{xp_progress}/100 XP to Level {level + 2}</small>
+                <small style="color: var(--text-main); font-weight: 600;">Level {level + 1}</small>
+                <small style="color: var(--text-muted);">{xp_progress}/100 XP to Level {level + 2}</small>
             </div>
-            <div style="height: 8px; background: rgba(0, 0, 0, 0.05); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
-                <div style="width: {xp_progress}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 4px;"></div>
+            <div style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+                <div style="width: {xp_progress}%; height: 100%; background: var(--gradient-primary); border-radius: 4px;"></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
     with st.expander("📋 **Learning Profile**", expanded=False):
-        st.markdown("<small style='color: #64748b;'>Customize how AI teaches you</small>", unsafe_allow_html=True)
+        st.markdown("<small style='color: var(--text-muted);'>Customize how AI teaches you</small>", unsafe_allow_html=True)
         
         education_level = st.selectbox(
             "Education Level",
@@ -998,16 +1049,16 @@ with st.sidebar:
         progress_percent = min(100, int((proficiency_level / target_proficiency) * 100)) if target_proficiency > 0 else 0
         st.markdown(f"""
         <div style="margin-top: 0.5rem;">
-            <small style="color: #64748b; font-weight: 600;">Goal Progress: {progress_percent}%</small>
-            <div style="height: 6px; background: rgba(0, 0, 0, 0.05); border-radius: 3px; overflow: hidden; margin-top: 0.2rem;">
-                <div style="width: {progress_percent}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 3px;"></div>
+            <small style="color: var(--text-muted); font-weight: 600;">Goal Progress: {progress_percent}%</small>
+            <div style="height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; overflow: hidden; margin-top: 0.2rem;">
+                <div style="width: {progress_percent}%; height: 100%; background: var(--gradient-success); border-radius: 3px;"></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    st.markdown("<p style='color: #334155; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;'>ACTIONS</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: var(--text-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; letter-spacing: 0.5px;'>ACTIONS</p>", unsafe_allow_html=True)
     
     col_btn_1, col_btn_2 = st.columns(2, gap="small")
     with col_btn_1:
@@ -1017,13 +1068,13 @@ with st.sidebar:
             st.rerun()
     with col_btn_2:
         if st.button("🔄 Reset Stats", use_container_width=True, help="Resets gamification points and streaks back to zero."):
-            st.session_state.gamification["points"] = 0
-            st.session_state.gamification["badges"] = []
-            st.session_state.gamification["streak"] = 0
+            db_manager.reset_stats('You')
+            st.session_state.gamification = db_manager.get_gamification_state('You')
             st.toast("✅ Stats reset!", icon="🔄")
             st.rerun()
 
     if st.button("🗑️ Clear All Generated Content", use_container_width=True, help="Removes all generated quizzes, study guides, and flashcards."):
+        db_manager.clear_generated_content('You')
         st.session_state.study_materials = []
         st.session_state.practice_tests = []
         st.session_state.flashcards = []
@@ -1033,13 +1084,13 @@ with st.sidebar:
     
     st.markdown("""
     <div style="text-align: center; margin-top: 2rem; padding: 1.2rem; 
-                background: rgba(0, 0, 0, 0.02);
-                border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.05);">
-        <small style="color: #0f172a; font-weight: 700; font-size: 0.95rem;">
-            📱 AI Study Buddy Pro
+                background: rgba(17, 24, 39, 0.45);
+                border-radius: 12px; border: 1px solid var(--border-color);">
+        <small style="color: var(--text-main); font-weight: 700; font-size: 0.95rem;">
+            📱 AI Study Buddy
         </small>
         <div style="margin-top: 0.5rem;">
-            <span style="background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+            <span style="background: var(--primary-glow); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">
                 Gemini Powered
             </span>
         </div>
@@ -1049,30 +1100,30 @@ with st.sidebar:
 # ====================== MAIN CONTENT ======================
 # Initialize session state
 if "study_materials" not in st.session_state:
-    st.session_state.study_materials = []
+    st.session_state.study_materials = db_manager.get_study_materials('You')
 if "practice_tests" not in st.session_state:
-    st.session_state.practice_tests = []
+    st.session_state.practice_tests = db_manager.get_practice_tests('You')
 if "flashcards" not in st.session_state:
-    st.session_state.flashcards = []
+    st.session_state.flashcards = db_manager.get_flashcards('You')
 if "study_plan" not in st.session_state:
     st.session_state.study_plan = None
 
 # App header with enhanced styling
 st.markdown("""
 <div style="text-align: center; margin-bottom: 3rem;">
-    <h1 style="font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 800;">🧠 AI Study Buddy Pro</h1>
-    <p style="font-size: 1.3rem; color: #64748b; font-weight: 500; margin: 0;">
-        Your <strong style="color: #6366f1;">Personalized Learning Assistant</strong> Powered by AI
+    <h1 style="font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🧠 AI Study Buddy</h1>
+    <p style="font-size: 1.3rem; color: var(--text-muted); font-weight: 500; margin: 0;">
+        Your <strong style="color: var(--primary);">Personalized Learning Assistant</strong> Powered by AI
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1)); 
-            border: 2px solid rgba(99, 102, 241, 0.2); padding: 2rem; border-radius: 20px; 
-            margin-bottom: 2.5rem; backdrop-filter: blur(10px);">
-    <h3 style="color: #1e293b; margin-top: 0; font-size: 1.3rem;">✨ Welcome to Your Learning Journey</h3>
-    <p style="color: #64748b; font-size: 1.05rem; margin: 0; line-height: 1.6;">
+<div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15)); 
+            border: 1px solid rgba(99, 102, 241, 0.3); padding: 2rem; border-radius: 20px; 
+            margin-bottom: 2.5rem; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);">
+    <h3 style="color: var(--text-main); margin-top: 0; font-size: 1.3rem;">✨ Welcome to Your Learning Journey</h3>
+    <p style="color: var(--text-muted); font-size: 1.05rem; margin: 0; line-height: 1.6;">
         Adapt your study approach to <strong>your unique needs</strong> with personalized content, 
         adaptive tests, and intelligent feedback powered by advanced AI technology.
     </p>
@@ -1086,8 +1137,8 @@ with col1:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">📖</div>
-            <h4 style="margin: 0 0 0.75rem 0; color: #6366f1;">Smart Study Materials</h4>
-            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.5;">
+            <h4 style="margin: 0 0 0.75rem 0; color: var(--primary);">Smart Study Materials</h4>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
                 Get AI-generated customized content tailored to your learning style, education level, and specific goals.
             </p>
         </div>
@@ -1097,8 +1148,8 @@ with col2:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">✍️</div>
-            <h4 style="margin: 0 0 0.75rem 0; color: #6366f1;">Adaptive Practice Tests</h4>
-            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.5;">
+            <h4 style="margin: 0 0 0.75rem 0; color: var(--primary);">Adaptive Practice Tests</h4>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
                 Generate MCQ tests with varying difficulty levels that match your current knowledge and adapt to your progress.
             </p>
         </div>
@@ -1108,8 +1159,8 @@ with col3:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">🗂️</div>
-            <h4 style="margin: 0 0 0.75rem 0; color: #6366f1;">Interactive Flashcards</h4>
-            <p style="margin: 0; color: #64748b; font-size: 0.95rem; line-height: 1.5;">
+            <h4 style="margin: 0 0 0.75rem 0; color: var(--primary);">Interactive Flashcards</h4>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
                 Create and review beautiful 3D flip cards with shuffle, restart, and progress tracking features.
             </p>
         </div>
@@ -1131,9 +1182,9 @@ with tab1:
     
     if not study_subject or study_subject.strip() == "":
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); 
-                    border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
-            <p style="margin: 0; color: #1e293b; font-weight: 600; font-size: 1.05rem;">
+        <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%); 
+                    border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(99, 102, 241, 0.25);">
+            <p style="margin: 0; color: var(--text-main); font-weight: 600; font-size: 1.05rem;">
                 👋 Welcome! Enter a topic in the sidebar to get started, or use our quick preset below.
             </p>
         </div>
@@ -1155,10 +1206,10 @@ with tab1:
                     st.rerun()
     else:
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; 
-                    padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.8rem;">📚 {study_subject}</h3>
-            <p style="margin: 0; opacity: 0.95; font-size: 0.95rem;">
+        <div style="background: var(--gradient-primary); color: white; 
+                    padding: 2rem; border-radius: 16px; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.8rem; color: white !important;">📚 {study_subject}</h3>
+            <p style="margin: 0; opacity: 0.95; font-size: 0.95rem; color: #e2e8f0 !important;">
                 Level: <strong>{education_level}</strong> • Style: <strong>{learning_style}</strong>
             </p>
         </div>
@@ -1189,26 +1240,26 @@ with tab1:
         
         with col1:
             st.markdown(f"""
-            <div style="background: white; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; text-align: center;">
-                <div style="font-size: 2rem; font-weight: 700; color: #3b82f6; margin-bottom: 0.5rem;">{proficiency_level}/10</div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Current Level</div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 16px; text-align: center; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                <div style="font-size: 2.2rem; font-weight: 800; color: #6366f1; margin-bottom: 0.5rem;">{proficiency_level}/10</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Level</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
-            <div style="background: white; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; text-align: center;">
-                <div style="font-size: 2rem; font-weight: 700; color: #0ea5e9; margin-bottom: 0.5rem;">{target_proficiency}/10</div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Target Level</div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 16px; text-align: center; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                <div style="font-size: 2.2rem; font-weight: 800; color: #a855f7; margin-bottom: 0.5rem;">{target_proficiency}/10</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Target Level</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
             progress_percent = min(100, int((proficiency_level / target_proficiency) * 100)) if target_proficiency > 0 else 0
             st.markdown(f"""
-            <div style="background: white; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; text-align: center;">
-                <div style="font-size: 2rem; font-weight: 700; color: #10b981; margin-bottom: 0.5rem;">{progress_percent}%</div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Progress</div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 16px; text-align: center; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                <div style="font-size: 2.2rem; font-weight: 800; color: #10b981; margin-bottom: 0.5rem;">{progress_percent}%</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Progress</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1218,14 +1269,14 @@ with tab1:
         st.markdown("2. Practice tests help identify weak areas")
         st.markdown("3. Flashcards are great for memorization and review")
         st.markdown("4. Use the tutor chat for in-depth explanations")
-
+ 
 # ====================== STUDY MATERIALS TAB ======================
 with tab2:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; 
-                padding: 2.5rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);">
-        <h2 style="margin: 0; font-size: 2.2rem; color: white;">📖 Personalized Study Materials</h2>
-        <p style="margin: 0.5rem 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 1.05rem;">
+    <div style="background: var(--gradient-primary); color: white; 
+                padding: 2.5rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);">
+        <h2 style="margin: 0; font-size: 2.2rem; color: white !important;">📖 Personalized Study Materials</h2>
+        <p style="margin: 0.5rem 0 0 0; color: rgba(248, 250, 252, 0.9) !important; font-size: 1.05rem;">
             AI-generated content tailored to your learning style and goals
         </p>
     </div>
@@ -1252,8 +1303,10 @@ with tab2:
                     materials = generate_study_materials(
                         study_subject, education_level, learning_style, study_goals
                     )
+                    timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    db_manager.save_study_material('You', material_type, study_subject, materials)
                     st.session_state.study_materials.append({
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        "timestamp": timestamp_str,
                         "type": material_type,
                         "content": materials
                     })
@@ -1263,13 +1316,13 @@ with tab2:
         if st.session_state.study_materials:
             latest = st.session_state.study_materials[-1]
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1)); 
-                        border-left: 4px solid #6366f1; padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;
-                        border: 1px solid rgba(99, 102, 241, 0.2);">
+            <div style="background: rgba(17, 24, 39, 0.5); 
+                        border-left: 4px solid var(--primary) !important; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;
+                        border: 1px solid var(--border-color); border-left: 4px solid var(--primary) !important;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h3 style="margin: 0; color: #6366f1; font-size: 1.3rem;">📄 {latest['type']}</h3>
-                        <small style="color: #64748b;">Generated at {latest['timestamp']}</small>
+                        <h3 style="margin: 0; color: var(--primary) !important; font-size: 1.3rem;">📄 {latest['type']}</h3>
+                        <small style="color: var(--text-muted);">Generated at {latest['timestamp']}</small>
                     </div>
                     <div style="font-size: 2rem;">📚</div>
                 </div>
@@ -1278,8 +1331,8 @@ with tab2:
             
             with st.expander("📝 **View Content**", expanded=True):
                 st.markdown(f"""
-                <div style="background: white; padding: 1.5rem; border-radius: 10px; 
-                            border: 1px solid #e2e8f0; line-height: 1.8;">
+                <div style="background: rgba(17, 24, 39, 0.35); padding: 1.5rem; border-radius: 12px; 
+                            border: 1px solid var(--border-color); line-height: 1.8; color: var(--text-main) !important;">
                 {latest["content"]}
                 </div>
                 """, unsafe_allow_html=True)
@@ -1313,10 +1366,10 @@ with tab2:
                 )
     else:
         st.markdown("""
-        <div style="text-align: center; padding: 3rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
-                    border-radius: 20px; border: 2px dashed #6366f1;">
-            <h3 style="color: #6366f1; margin-bottom: 1rem;">📚 Select a Subject First</h3>
-            <p style="color: #64748b; font-size: 1.1rem; margin: 0;">
+        <div style="text-align: center; padding: 3rem; background: rgba(17, 24, 39, 0.45);
+                    border-radius: 20px; border: 2px dashed var(--primary); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);">
+            <h3 style="color: var(--primary) !important; margin-bottom: 1rem;">📚 Select a Subject First</h3>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">
                 Enter a subject/topic in the sidebar to generate personalized study materials.
             </p>
         </div>
@@ -1365,7 +1418,7 @@ with tab3:
                     response = st.session_state.chat_session.send_message(prompt)
                     test_content = response.text
                     
-                    st.session_state.practice_tests.append({
+                    new_test = {
                         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "num_questions": num_questions,
                         "difficulty": difficulty,
@@ -1373,7 +1426,9 @@ with tab3:
                         "user_answers": {},
                         "submitted": False,
                         "show_answers": False
-                    })
+                    }
+                    db_manager.save_practice_test('You', study_subject, new_test)
+                    st.session_state.practice_tests.append(new_test)
                     st.session_state.current_test = len(st.session_state.practice_tests) - 1
                     st.rerun()
         
@@ -1438,6 +1493,7 @@ with tab3:
                     st.session_state.gamification["study_sessions_today"] += 1
                     award_points(10 + current_test["num_questions"])  # More points for longer tests
                     update_streak()
+                    db_manager.save_practice_test('You', study_subject, current_test)
                     st.rerun()
             
             # In the Practice Tests tab (tab3), replace the evaluation section with this:
@@ -1550,13 +1606,15 @@ with tab4:
                     5. Ensure each flashcard has both Front and Back sections
                     """
                     response = st.session_state.chat_session.send_message(prompt)
-                    st.session_state.flashcards.append({
+                    new_set = {
                         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "count": flashcard_count,
                         "focus": flashcard_focus,
                         "content": response.text,
-                        "srs_data": {} # For spaced repetition
-                    })
+                        "srs_data": {}
+                    }
+                    db_manager.save_flashcard('You', study_subject, new_set)
+                    st.session_state.flashcards.append(new_set)
                     st.session_state.current_flashcard_set = len(st.session_state.flashcards) - 1
                     st.rerun()
         
@@ -1648,9 +1706,9 @@ with tab4:
                         <small>Card {current_idx + 1} of {total_cards}</small>
                         <small>{int(progress * 100)}% Complete</small>
                     </div>
-                    <div style="height: 8px; background-color: #e0e0e0; border-radius: 4px;">
+                    <div style="height: 8px; background-color: rgba(255, 255, 255, 0.05); border-radius: 4px;">
                         <div style="height: 100%; width: {progress * 100}%; 
-                                    background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); 
+                                    background: var(--gradient-primary); 
                                     border-radius: 4px; transition: width 0.3s ease;"></div>
                     </div>
                 </div>
@@ -1687,8 +1745,8 @@ with tab4:
 with tab5:
     st.header("💬 Interactive Tutor Chat")
     st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-        <p style="margin: 0;">Ask specific questions about your study topic for personalized explanations.</p>
+    <div style="background-color: rgba(17, 24, 39, 0.45); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+        <p style="margin: 0; color: var(--text-muted);">Ask specific questions about your study topic for personalized explanations.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1763,8 +1821,34 @@ with tab5:
                         [prompt, {"mime_type": "image/png", "data": img_byte_arr}]
                     )
                 else:
-                    # For PDFs or other docs (simplified handling)
-                    prompt = f"Please help me analyze this document: {uploaded_file.name}. {user_input}"
+                    # For PDFs
+                    import pypdf
+                    try:
+                        pdf_reader = pypdf.PdfReader(uploaded_file)
+                        text = ""
+                        for page in pdf_reader.pages:
+                            page_text = page.extract_text()
+                            if page_text:
+                                text += page_text + "\n"
+                        if not text.strip():
+                            text = "[No text extractable from this PDF (it might be a scanned image or contain no selectable text)]"
+                    except Exception as e:
+                        text = f"[Error reading PDF file: {e}]"
+                    
+                    user_q = user_input if user_input else "Summarize this document and explain the key concepts."
+                    prompt = f"""
+You are a helpful tutor analyzing an uploaded PDF document.
+
+Document Name: {uploaded_file.name}
+
+--- DOCUMENT CONTENT ---
+{text}
+--- END DOCUMENT CONTENT ---
+
+User Question: {user_q}
+
+Please answer the user's question based on the document content above. If the document content is empty or unreadable, guide the student on how to proceed.
+"""
                     response = st.session_state.tutor_chat_session.send_message(prompt)
             else:
                 response = st.session_state.tutor_chat_session.send_message(user_input)
@@ -1788,10 +1872,10 @@ with tab5:
 # ====================== GAMIFICATION TAB ======================
 with tab6:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f59e0b, #ec4899); color: white; 
-                padding: 2.5rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);">
-        <h2 style="margin: 0; font-size: 2.2rem; color: white;">🏆 Your Learning Journey</h2>
-        <p style="margin: 0.5rem 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 1.05rem;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%); color: white; 
+                padding: 2.5rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.25); border: 1px solid rgba(255, 255, 255, 0.1);">
+        <h2 style="margin: 0; font-size: 2.2rem; color: white !important;">🏆 Your Learning Journey</h2>
+        <p style="margin: 0.5rem 0 0 0; color: rgba(248, 250, 252, 0.9) !important; font-size: 1.05rem;">
             Track achievements, badges, and compete on the leaderboard
         </p>
     </div>
@@ -1803,9 +1887,9 @@ with tab6:
         st.markdown("### 🎖️ Your Badges")
         if not st.session_state.gamification["badges"]:
             st.markdown("""
-            <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
-                        border-radius: 15px; border: 2px dashed #6366f1;">
-                <p style="color: #64748b; font-size: 1.05rem; margin: 0;">
+            <div style="text-align: center; padding: 2rem; background: rgba(17, 24, 39, 0.45);
+                        border-radius: 15px; border: 2px dashed var(--primary); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);">
+                <p style="color: var(--text-muted); font-size: 1.05rem; margin: 0;">
                     🌱 You haven't earned any badges yet.<br>
                     Keep studying to unlock amazing achievements!
                 </p>
@@ -1820,9 +1904,9 @@ with tab6:
                     <div class="badge-card">
                         <div class="badge-icon">{badge['icon']}</div>
                         <div class="badge-info">
-                            <strong style="color: #6366f1; font-size: 1.1rem;">{badge['name']}</strong>
-                            <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.9rem;">{badge['desc']}</p>
-                            <small style="color: #6366f1; font-weight: 700;">+{badge['points']} XP</small>
+                            <strong style="color: var(--primary) !important; font-size: 1.1rem; display: block;">{badge['name']}</strong>
+                            <p style="margin: 0.3rem 0; color: var(--text-muted) !important; font-size: 0.9rem;">{badge['desc']}</p>
+                            <small style="color: var(--primary) !important; font-weight: 700;">+{badge['points']} XP</small>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -1834,23 +1918,23 @@ with tab6:
         
         with stats_col1:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; 
-                        padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);">
-                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            <div style="background: var(--gradient-primary); color: white; 
+                        padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: white !important;">
                     {st.session_state.gamification["study_sessions_today"]}
                 </div>
-                <div style="font-size: 0.95rem; opacity: 0.9;">Study Sessions Today</div>
+                <div style="font-size: 0.95rem; opacity: 0.9; color: #f1f5f9 !important;">Study Sessions Today</div>
             </div>
             """, unsafe_allow_html=True)
         
         with stats_col2:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; 
-                        padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);">
-                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            <div style="background: var(--gradient-info); color: white; 
+                        padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: white !important;">
                     {st.session_state.gamification["flashcards_reviewed"]}
                 </div>
-                <div style="font-size: 0.95rem; opacity: 0.9;">Flashcards Reviewed</div>
+                <div style="font-size: 0.95rem; opacity: 0.9; color: #f1f5f9 !important;">Flashcards Reviewed</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1858,34 +1942,34 @@ with tab6:
         
         with stats_col3:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; 
-                        padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);">
-                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            <div style="background: var(--gradient-warning); color: white; 
+                        padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: white !important;">
                     {st.session_state.gamification["streak"]} 🔥
                 </div>
-                <div style="font-size: 0.95rem; opacity: 0.9;">Day Streak</div>
+                <div style="font-size: 0.95rem; opacity: 0.9; color: #f1f5f9 !important;">Day Streak</div>
             </div>
             """, unsafe_allow_html=True)
         
         with stats_col4:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; 
-                        padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);">
-                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            <div style="background: var(--gradient-success); color: white; 
+                        padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: white !important;">
                     {st.session_state.gamification["perfect_days"]}/7
                 </div>
-                <div style="font-size: 0.95rem; opacity: 0.9;">Perfect Days This Week</div>
+                <div style="font-size: 0.95rem; opacity: 0.9; color: #f1f5f9 !important;">Perfect Days This Week</div>
             </div>
             """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("### 🏅 Leaderboard")
-        st.markdown("<small style='color: #64748b; font-weight: 600;'>Top Learners This Week</small>", unsafe_allow_html=True)
+        st.markdown("<small style='color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;'>Top Learners This Week</small>", unsafe_allow_html=True)
         
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #ffffff, #f8fafc); 
-                    border-radius: 15px; padding: 1.5rem; border: 1px solid #e2e8f0;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+        <div style="background: rgba(17, 24, 39, 0.45); 
+                    border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);">
         """, unsafe_allow_html=True)
         
         for i, entry in enumerate(st.session_state.gamification["leaderboard"]):
@@ -1893,14 +1977,13 @@ with tab6:
             medal = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else f"#{i+1}"
             
             st.markdown(f"""
-            <div class="leaderboard-entry {'leaderboard-you' if is_you else ''}" 
-                 style="padding: 1rem; margin-bottom: 0.75rem; {'background: linear-gradient(90deg, #dbeafe, #e0e7ff); border-left: 4px solid #6366f1;' if is_you else ''}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="leaderboard-entry {'leaderboard-you' if is_you else ''}">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 1.5rem; font-weight: 700;">{medal}</span>
-                        <span style="font-weight: 600; color: {'#6366f1' if is_you else '#1e293b'};">{entry['name']}</span>
+                        <span style="font-weight: 600; color: {'var(--primary)' if is_you else 'var(--text-main)'};">{entry['name']}</span>
                     </div>
-                    <div style="font-weight: 700; color: #6366f1; font-size: 1.05rem;">{entry['points']} XP</div>
+                    <div style="font-weight: 700; color: var(--primary); font-size: 1.05rem;">{entry['points']} XP</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -1910,7 +1993,7 @@ with tab6:
         st.divider()
         
         st.markdown("### 🔜 Next Badges")
-        st.markdown("<small style='color: #64748b; font-weight: 600;'>Earn These Next</small>", unsafe_allow_html=True)
+        st.markdown("<small style='color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;'>Earn These Next</small>", unsafe_allow_html=True)
         
         available_badges = [b for b in BADGES if b not in st.session_state.gamification["badges"]]
         if available_badges:
@@ -1918,16 +2001,16 @@ with tab6:
             for badge_id in sample_badges:
                 badge = BADGES[badge_id]
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05)); 
-                            padding: 1rem; border-radius: 10px; margin-bottom: 0.75rem; 
-                            border-left: 3px solid #6366f1; border: 1px solid rgba(99, 102, 241, 0.2);">
+                <div style="background: rgba(17, 24, 39, 0.45); 
+                            padding: 1rem; border-radius: 12px; margin-bottom: 0.75rem; 
+                            border-left: 3px solid var(--primary) !important; border: 1px solid var(--border-color); border-left: 3px solid var(--primary) !important;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <span style="font-size: 1.5rem;">{badge['icon']}</span>
                         <div style="flex-grow: 1;">
-                            <strong style="color: #6366f1; display: block;">{badge['name']}</strong>
-                            <small style="color: #64748b;">{badge['desc']}</small>
+                            <strong style="color: var(--primary); display: block;">{badge['name']}</strong>
+                            <small style="color: var(--text-muted);">{badge['desc']}</small>
                         </div>
-                        <span style="font-weight: 700; color: #6366f1; white-space: nowrap;">+{badge['points']} XP</span>
+                        <span style="font-weight: 700; color: var(--primary); white-space: nowrap;">+{badge['points']} XP</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1938,16 +2021,16 @@ with tab6:
 st.divider()
 st.markdown("""
 <div style="text-align: center; padding: 2.5rem 1rem; 
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
-            border-radius: 15px; margin-top: 2rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-    <h4 style="color: #6366f1; margin-bottom: 0.75rem; font-size: 1.1rem;">✨ AI Study Buddy Pro</h4>
-    <p style="color: #64748b; margin: 0.5rem 0; font-size: 0.95rem;">
-        Advanced Learning Platform Powered by Gemini 1.5 Pro
+            background: rgba(17, 24, 39, 0.45);
+            border-radius: 16px; margin-top: 2rem; border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);">
+    <h4 style="color: var(--primary); margin-bottom: 0.75rem; font-size: 1.1rem;">✨ AI Study Buddy</h4>
+    <p style="color: var(--text-muted); margin: 0.5rem 0; font-size: 0.95rem;">
+        Advanced Learning Platform Powered by Gemini 2.5 Flash
     </p>
     <p style="color: #94a3b8; margin: 0.5rem 0; font-size: 0.85rem;">
-        v2.0 • © 2024 Learning Technologies • Designed for Modern Students
+        v2.0 • © 2026 Learning Technologies • Designed for Modern Students
     </p>
-    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(99, 102, 241, 0.2);">
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
         <small style="color: #94a3b8;">
             🚀 Combining AI Intelligence with Interactive Learning
         </small>
