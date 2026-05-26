@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ai-study-buddy-deployment
+  namespace: ai-study-buddy
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: ai-study-buddy
+
+  template:
+    metadata:
+      labels:
+        app: ai-study-buddy
+
+    spec:
+      containers:
+        - name: ai-study-buddy-container
+
+          image: ai-study-buddy-pro:latest
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8501
+
+          envFrom:
+            - configMapRef:
+                name: ai-study-buddy-config
+
+            - secretRef:
+                name: ai-study-buddy-secret
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+
+            initialDelaySeconds: 20
+            periodSeconds: 5
