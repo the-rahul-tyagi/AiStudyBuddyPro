@@ -32,7 +32,7 @@ def init_database():
 init_database()
 
 # Configure Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     st.error("❌ GEMINI_API_KEY not found in .env file!")
     st.stop()
