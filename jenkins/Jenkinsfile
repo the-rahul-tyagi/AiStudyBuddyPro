@@ -1,0 +1,77 @@
+pipeline {
+
+    agent any
+
+    environment {
+        IMAGE_NAME = "ai-study-buddy-pro"
+        CONTAINER_NAME = "ai-study-buddy-container"
+    }
+
+    stages {
+
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning GitHub repository...'
+                git branch: 'main',
+                url: 'https://github.com/the-rahul-tyagi/AiStudyBuddyPro.git'
+            }
+        }
+
+        stage('Verify Docker Installation') {
+            steps {
+                echo 'Checking Docker version...'
+                sh 'docker --version'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                sh 'docker build -t ${IMAGE_NAME} .'
+            }
+        }
+
+        stage('Stop Existing Container') {
+            steps {
+                echo 'Stopping old container if exists...'
+
+                sh '''
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+                '''
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                echo 'Running Docker container...'
+
+                sh '''
+                docker run -d \
+                --name ${CONTAINER_NAME} \
+                -p 8501:8501 \
+                --env-file .env \
+                ${IMAGE_NAME}
+                '''
+            }
+        }
+
+        stage('Verify Running Container') {
+            steps {
+                echo 'Checking running containers...'
+                sh 'docker ps'
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'CI/CD Pipeline executed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline execution failed!'
+        }
+    }
+}
