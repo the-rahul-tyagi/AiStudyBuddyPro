@@ -1,5 +1,4 @@
 services:
-
   ai-study-buddy-app:
     build: .
     container_name: ai-study-buddy-container
@@ -26,7 +25,7 @@ services:
       - "9090:9090"
 
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus-config.yaml:/etc/prometheus/prometheus.yml
 
     restart: always
 
@@ -56,15 +55,6 @@ services:
 
 volumes:
   jenkins_home:
-
-
-
-
-
-
-
-
-
 
 # version: '3.9'
 
