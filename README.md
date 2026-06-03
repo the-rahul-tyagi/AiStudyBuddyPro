@@ -1,107 +1,145 @@
 <div align="center">
 
-# 🎓 AI Study Buddy Pro
+# 🎓 AI Study Buddy
 
-**An AI-Powered Personalized Learning Platform with End-to-End DevOps Automation**
+### AI-Powered Personalized Learning Platform with Complete DevOps Automation
 
-<br/>
+<br>
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
-[![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat-square&logo=jenkins&logoColor=white)](https://jenkins.io)
-[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat-square&logo=terraform&logoColor=white)](https://terraform.io)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white)](https://kubernetes.io)
-[![AWS](https://img.shields.io/badge/AWS_EC2-FF9900?style=flat-square&logo=amazonaws&logoColor=white)](https://aws.amazon.com)
-[![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white)](https://prometheus.io)
-[![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat-square&logo=grafana&logoColor=white)](https://grafana.com)
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-Application-red?style=for-the-badge&logo=streamlit)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)
+![Jenkins](https://img.shields.io/badge/Jenkins-CI/CD-red?style=for-the-badge&logo=jenkins)
 
-<br/>
-
-> *Bridging AI-powered education with production-grade DevOps — from code to cloud, fully automated.*
-
-<br/>
-
-[Overview](#-overview) · [Features](#-features) · [Architecture](#-system-architecture) · [Tech Stack](#-technology-stack) · [Setup](#-local-development-setup) · [Docker](#-docker-deployment) · [AWS](#️-aws-deployment) · [Jenkins](#-cicd-pipeline--jenkins) · [Terraform](#-infrastructure-as-code--terraform) · [Kubernetes](#️-kubernetes-configuration) · [Monitoring](#-monitoring--observability) · [Roadmap](#-future-enhancements)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-purple?style=for-the-badge&logo=terraform)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Orchestration-blue?style=for-the-badge&logo=kubernetes)
+![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-orange?style=for-the-badge&logo=prometheus)
+![Grafana](https://img.shields.io/badge/Grafana-Visualization-yellow?style=for-the-badge&logo=grafana)
+![AWS](https://img.shields.io/badge/AWS-EC2-orange?style=for-the-badge&logo=amazonaws)
 
 </div>
 
 ---
 
-## 📖 Overview
+## 📖 Project Overview
 
-**AI Study Buddy Pro** is a cloud-native educational platform that delivers personalized learning assistance through an intelligent AI interface. Beyond the application itself, this project is a complete showcase of modern DevOps practices — covering Infrastructure as Code, CI/CD automation, containerization, Kubernetes orchestration, and real-time observability.
+AI Study Buddy is a cloud-native educational platform designed to provide personalized learning assistance while demonstrating a complete end-to-end DevOps implementation. The project combines Artificial Intelligence, Cloud Computing, Infrastructure as Code (IaC), Containerization, CI/CD Automation, Kubernetes Orchestration, and Monitoring into a single production-oriented solution.
 
-This project serves dual purposes:
+The application is developed using **Python** and **Streamlit** and deployed on **AWS EC2** using Docker containers. The deployment lifecycle is automated through **Jenkins CI/CD pipelines**, infrastructure provisioning is handled using **Terraform**, and monitoring is achieved through **Prometheus**, **Grafana**, and **Node Exporter**.
 
-- 🤖 **An AI-powered educational platform** — interactive, personalized, and accessible
-- ⚙️ **A production-grade DevOps implementation** — automated, monitored, and cloud-deployed
+This project serves as both:
+
+- An **AI-powered educational platform**
+- A **practical implementation** of modern DevOps practices
 
 ---
 
-## ✨ Features
+## 🎯 Project Objectives
+
+### Educational Objectives
+
+- Provide personalized study assistance
+- Create an interactive learning environment
+- Enhance student learning experience
+- Demonstrate AI-assisted education concepts
+
+### Technical Objectives
+
+- Implement Infrastructure as Code (IaC)
+- Automate deployment through CI/CD
+- Containerize the application using Docker
+- Deploy cloud infrastructure on AWS
+- Demonstrate Kubernetes configuration and orchestration
+- Implement real-time monitoring and observability
+- Follow modern DevOps best practices
+
+---
+
+## 🚀 Key Features
 
 ### Application Features
 
-| Feature | Description |
-|---|---|
-| 📚 Personalized Learning Support | Intelligent educational assistance tailored to individual learning needs |
-| 🎨 Interactive User Interface | Clean, modern UI built with Streamlit |
-| ⚡ Fast and Lightweight Deployment | Containerized architecture ensures efficient deployment and portability |
-| ☁️ Cloud Hosted | Deployed on AWS EC2 for accessibility and scalability |
+#### 📚 Personalized Learning Support
+
+Provides intelligent educational assistance tailored to learning needs.
+
+#### 🎨 Interactive User Interface
+
+Built using Streamlit for a modern and user-friendly experience.
+
+#### ⚡ Fast and Lightweight Deployment
+
+Containerized architecture ensures efficient deployment and portability.
+
+#### ☁️ Cloud Hosted
+
+Application deployed on AWS EC2 for accessibility and scalability.
+
+---
 
 ### DevOps Features
 
-| Feature | Description |
-|---|---|
-| 🔄 CI/CD Automation | Automated build and deployment using Jenkins |
-| 🐳 Docker Containerization | Application packaged into portable Docker containers |
-| ☸️ Kubernetes Configuration | Deployment manifests prepared for container orchestration |
-| 🏗️ Infrastructure as Code | AWS infrastructure provisioned using Terraform |
-| 📊 Real-Time Monitoring | Prometheus and Node Exporter collect metrics |
-| 📈 Dashboard Visualization | Grafana dashboards provide infrastructure insights |
+#### 🔄 CI/CD Automation
+
+Automated build and deployment using Jenkins.
+
+#### 🐳 Docker Containerization
+
+Application packaged into portable Docker containers.
+
+#### ☸️ Kubernetes Configuration
+
+Deployment manifests prepared for container orchestration.
+
+#### 🏗️ Infrastructure as Code
+
+AWS infrastructure provisioned using Terraform.
+
+#### 📊 Real-Time Monitoring
+
+Prometheus and Node Exporter collect metrics.
+
+#### 📈 Dashboard Visualization
+
+Grafana dashboards provide infrastructure insights.
 
 ---
 
-## 🏗 System Architecture
+## 🏗️ System Architecture
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                     Developer Machine                    │
-│                    Code  →  Git Push                     │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                    GitHub Repository                     │
-└────────────────────────────┬─────────────────────────────┘
-                             │  Webhook Trigger
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                  Jenkins CI/CD Pipeline                  │
-│       Checkout  →  Build Image  →  Deploy Container      │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-                             ▼
-┌──────────────────────────────────────────────────────────┐
-│                    AWS EC2 (t3.small)                    │
-│                                                          │
-│  ┌──────────────────┐      ┌──────────────────────────┐  │
-│  │  AI Study Buddy  │      │    Monitoring Stack      │  │
-│  │   (Streamlit)    │      │                          │  │
-│  │     :8501        │      │  Node Exporter  :9100    │  │
-│  └──────────────────┘      │  Prometheus     :9090    │  │
-│                            │  Grafana        :3000    │  │
-│  ┌──────────────────┐      └──────────────────────────┘  │
-│  │    Jenkins       │                                    │
-│  │    :8081         │                                    │
-│  └──────────────────┘                                    │
-└──────────────────────────────────────────────────────────┘
+Developer
+    │
+    ▼
+GitHub Repository
+    │
+    ▼
+Jenkins CI/CD Pipeline
+    │
+    ▼
+Docker Build Process
+    │
+    ▼
+Docker Containers
+    │
+    ▼
+AWS EC2 (t3.small)
+    │
+ ┌──┼─────────────────────────────┐
+ │  │                             │
+ ▼  ▼                             ▼
+Application                 Prometheus
+(Streamlit)                     │
+                                 ▼
+                          Node Exporter
+                                 │
+                                 ▼
+                              Grafana
 ```
 
 ---
 
-## 🛠 Technology Stack
+## 🛠️ Technology Stack
 
 | Category | Technology |
 |---|---|
@@ -121,10 +159,25 @@ This project serves dual purposes:
 
 ---
 
+## ☁️ Cloud Infrastructure
+
+### Deployment Environment
+
+| Component | Details |
+|---|---|
+| Cloud Provider | AWS |
+| Compute Service | EC2 |
+| Instance Type | t3.small |
+| Operating System | Ubuntu 24.04 LTS |
+| Region | ap-south-1 |
+| Access Method | SSH |
+
+---
+
 ## 📂 Repository Structure
 
 ```
-AI_STUDY_BUDDY_PRO/
+AI_STUDY_BUDDY_PRO
 │
 ├── .streamlit/                  # Streamlit configuration
 ├── .venv/                       # Python virtual environment
@@ -141,13 +194,13 @@ AI_STUDY_BUDDY_PRO/
 │   └── service.yaml
 │
 ├── monitoring/
-│   ├── grafana/                 # Grafana dashboard configs
-│   └── prometheus/              # Prometheus scrape configs
+│   ├── grafana/
+│   └── prometheus/
 │
 ├── terraform/                   # Infrastructure as Code files
 │
 ├── .dockerignore
-├── .env                         # Environment variables (not committed)
+├── .env
 ├── .gitignore
 ├── docker-compose.yml
 ├── Dockerfile
@@ -155,6 +208,7 @@ AI_STUDY_BUDDY_PRO/
 │
 ├── Project_Presentation.pptx
 ├── Project_Report.pdf
+│
 └── README.md
 ```
 
@@ -164,54 +218,45 @@ AI_STUDY_BUDDY_PRO/
 
 ```
 Code Development
-      │
-      ▼
-Git Commit & Push
-      │
-      ▼
-GitHub Repository
-      │
-      ▼
-Jenkins CI/CD Pipeline
-      │
-      ▼
+       │
+       ▼
+Git Commit
+       │
+       ▼
+GitHub Push
+       │
+       ▼
+Jenkins Pipeline
+       │
+       ▼
 Docker Build
-      │
-      ▼
+       │
+       ▼
 Container Deployment
-      │
-      ▼
+       │
+       ▼
 AWS EC2 Hosting
-      │
-      ▼
+       │
+       ▼
 Prometheus Monitoring
-      │
-      ▼
+       │
+       ▼
 Grafana Visualization
 ```
 
 ---
 
-## ☁ Cloud Infrastructure
+## ⚙️ Installation & Setup Guide
 
-### Deployment Environment
-
-| Component | Details |
-|---|---|
-| Cloud Provider | AWS |
-| Compute Service | EC2 |
-| Instance Type | t3.small |
-| Operating System | Ubuntu 24.04 LTS |
-| Region | ap-south-1 (Mumbai) |
-| Access Method | SSH |
+This section explains how to set up and run AI Study Buddy in a local environment and deploy it using Docker.
 
 ---
 
-## 💻 Local Development Setup
+## 📋 Prerequisites
 
-### Prerequisites
+Before running the project, ensure the following software is installed on your system.
 
-Ensure the following are installed before proceeding:
+### Required Software
 
 | Software | Version |
 |---|---|
@@ -228,115 +273,168 @@ Ensure the following are installed before proceeding:
 
 ---
 
+## 💻 Local Development Setup
+
 ### Step 1 — Clone the Repository
+
+Clone the GitHub repository to your local machine.
 
 ```bash
 git clone https://github.com/the-rahul-tyagi/AiStudyBuddyPro.git
 cd AiStudyBuddyPro
 ```
 
-### Step 2 — Create a Virtual Environment
+---
 
-**Windows**
+### Step 2 — Create Virtual Environment
+
+A Python virtual environment is used to isolate project dependencies.
+
+**Windows:**
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-**Linux / macOS**
+**Linux / Mac:**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-After activation, your terminal prompt will show:
+After activation, the terminal prompt should display:
+
 ```
 (.venv)
 ```
 
+---
+
 ### Step 3 — Install Dependencies
+
+Install all required Python packages.
 
 ```bash
 pip install -r requirements.txt
 ```
 
+---
+
 ### Step 4 — Configure Environment Variables
 
-Create a `.env` file at `AI_STUDY_BUDDY_PRO/.env`:
+Create and configure the `.env` file.
 
+**Location:**
+```
+AI_STUDY_BUDDY_PRO/.env
+```
+
+**Example:**
 ```env
 OPENAI_API_KEY=your_api_key_here
 APP_ENV=development
 ```
 
-> **Why environment variables?** They secure sensitive information, separate configuration from code, and support multiple deployment environments without code changes.
+#### Why Environment Variables?
 
-> ⚠️ Never commit the `.env` file to version control.
+Environment variables help:
+
+- Secure sensitive information
+- Separate configuration from code
+- Support multiple deployment environments
+
+---
 
 ### Step 5 — Run the Application
+
+Start the Streamlit application.
 
 ```bash
 streamlit run app/app.py
 ```
 
-Open your browser at: **`http://localhost:8501`**
+**Application URL:**
+```
+http://localhost:8501
+```
 
 ---
 
 ## 🐳 Docker Deployment
 
+---
+
 ### Why Docker?
 
-Docker packages the application into a portable container, providing:
+Docker was used to package the application into a portable container.
 
-- Consistent execution environment across all machines
-- Easy and repeatable deployment
+**Benefits include:**
+
+- Consistent execution environment
+- Easy deployment
 - Simplified dependency management
 - Platform independence
+
+---
 
 ### Docker Architecture
 
 ```
 Application Source Code
-         │
-         ▼
-      Dockerfile
-         │
-         ▼
-    Docker Image
-         │
-         ▼
-  Docker Container
-         │
-         ▼
-    AWS EC2 Server
+          │
+          ▼
+       Dockerfile
+          │
+          ▼
+      Docker Image
+          │
+          ▼
+    Docker Container
+          │
+          ▼
+      AWS EC2 Server
 ```
+
+---
 
 ### Dockerfile Overview
 
-The Dockerfile defines how the application image is built. Its responsibilities:
+The Dockerfile defines how the application image is created.
 
-- Select the Python base image
-- Install all required dependencies
-- Copy application source files
-- Configure Streamlit settings
-- Launch the application on container start
+**Main Responsibilities:**
 
-### Build the Docker Image
+- Select Python base image
+- Install dependencies
+- Copy application files
+- Configure Streamlit
+- Start application
+
+---
+
+### Build Docker Image
+
+Create the Docker image.
 
 ```bash
 docker build -t ai-study-buddy-pro .
 ```
 
-Verify the image was created:
+Verify image creation.
 
 ```bash
 docker images
 ```
 
-Expected output includes: `ai-study-buddy-pro`
+Expected image:
+```
+ai-study-buddy-pro
+```
 
-### Run the Container
+---
+
+### Run Docker Container
+
+Start the application container.
 
 ```bash
 docker run -d \
@@ -346,53 +444,107 @@ docker run -d \
   ai-study-buddy-pro
 ```
 
-### Manage the Container
+---
+
+### Verify Container Status
 
 ```bash
-# Verify container is running
 docker ps
+```
 
-# View container logs
+Expected container:
+```
+ai-study-buddy-container
+```
+
+---
+
+### View Container Logs
+
+```bash
 docker logs ai-study-buddy-container
+```
 
-# Restart container
+---
+
+### Restart Container
+
+```bash
 docker restart ai-study-buddy-container
+```
 
-# Stop container
+---
+
+### Stop Container
+
+```bash
 docker stop ai-study-buddy-container
+```
 
-# Remove container
+---
+
+### Remove Container
+
+```bash
 docker rm ai-study-buddy-container
 ```
 
 ---
 
-## 🐙 Docker Compose Setup
+## 🐳 Docker Compose Setup
 
-Docker Compose manages all project services simultaneously.
+The project uses Docker Compose to manage multiple services simultaneously.
+
+---
 
 ### Services Managed
 
-| Service | Container Name | Port |
-|---|---|---|
-| Application | ai-study-buddy-container | 8501 |
-| Jenkins | jenkins-container | 8081 |
-| Prometheus | prometheus-container | 9090 |
-| Grafana | grafana-container | 3000 |
-| Node Exporter | node-exporter | 9100 |
+| Service | Container Name |
+|---|---|
+| Application | ai-study-buddy-container |
+| Jenkins | jenkins-container |
+| Prometheus | prometheus-container |
+| Grafana | grafana-container |
+
+---
+
+### Start All Services
 
 ```bash
-docker compose up -d     # Start all services
-docker compose down      # Stop all services
-docker compose ps        # Check service status
-docker compose logs      # View all logs
+docker compose up -d
+```
+
+---
+
+### Stop All Services
+
+```bash
+docker compose down
+```
+
+---
+
+### Check Running Services
+
+```bash
+docker compose ps
+```
+
+---
+
+### View Logs
+
+```bash
+docker compose logs
 ```
 
 ---
 
 ## ☁️ AWS Deployment
 
-### Instance Details
+---
+
+### Deployment Environment
 
 | Parameter | Value |
 |---|---|
@@ -402,28 +554,51 @@ docker compose logs      # View all logs
 | Operating System | Ubuntu 24.04 LTS |
 | Region | ap-south-1 (Mumbai) |
 
+---
+
 ### Why t3.small?
 
-The `t3.small` instance provides:
+The t3.small instance was selected because it provides:
 
-- 2 vCPUs and 2 GB RAM
+- 2 vCPUs
+- 2 GB RAM
 - Better performance than t2.micro
 - Ability to run multiple containers simultaneously
-- Cost-effective pricing for academic projects
+- Cost-effective for academic projects
 
-### Connect to the EC2 Instance
+---
+
+### Connect to EC2
+
+Use SSH to access the server.
 
 ```bash
 ssh -i ai-study-buddy-key.pem ubuntu@<PUBLIC_IP>
 ```
 
-### Clone and Deploy on EC2
+**Example:**
+```bash
+ssh -i ai-study-buddy-key.pem ubuntu@3.x.x.x
+```
+
+---
+
+### Clone Repository on EC2
 
 ```bash
 git clone https://github.com/the-rahul-tyagi/AiStudyBuddyPro.git
 cd AiStudyBuddyPro
+```
+
+---
+
+### Deploy Services
+
+```bash
 docker compose up -d
 ```
+
+---
 
 ### Verify Running Containers
 
@@ -439,7 +614,11 @@ prometheus-container
 grafana-container
 ```
 
-### Security Group Configuration
+---
+
+## 🔒 Security Group Configuration
+
+The following inbound rules were configured on AWS.
 
 | Port | Protocol | Purpose |
 |---|---|---|
@@ -450,151 +629,483 @@ grafana-container
 | 3000 | TCP | Grafana |
 | 9100 | TCP | Node Exporter |
 
-### Service Endpoints
+---
 
-Replace `<EC2_PUBLIC_IP>` with your instance's public IP address.
+## 🌐 Service Endpoints
 
-| Service | URL |
-|---|---|
-| AI Study Buddy App | `http://<EC2_PUBLIC_IP>:8501` |
-| Jenkins | `http://<EC2_PUBLIC_IP>:8081` |
-| Prometheus | `http://<EC2_PUBLIC_IP>:9090` |
-| Grafana | `http://<EC2_PUBLIC_IP>:3000` |
+> Replace `<EC2_PUBLIC_IP>` with your server IP address.
+
+### AI Study Buddy Application
+```
+http://<EC2_PUBLIC_IP>:8501
+```
+
+### Jenkins
+```
+http://<EC2_PUBLIC_IP>:8081
+```
+
+### Prometheus
+```
+http://<EC2_PUBLIC_IP>:9090
+```
+
+### Grafana
+```
+http://<EC2_PUBLIC_IP>:3000
+```
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots to Include
 
-Add the following screenshots to your final submission:
+Add screenshots of:
 
-**Application:** Home page · Main dashboard  
-**Docker:** `docker ps` output · Docker images list  
-**AWS:** EC2 instance details · Security group configuration  
-**Jenkins:** Dashboard · Successful build · Pipeline stages  
-**Terraform:** `terraform apply` output · AWS EC2 dashboard  
-**Kubernetes:** `kubectl get nodes` · `kubectl get deployments` · `kubectl get services`  
-**Prometheus:** Target status page · Metrics queries  
-**Grafana:** Node Exporter dashboard · System monitoring dashboard  
+### Application
+- Home Page
+- Main Dashboard
+
+### Docker
+- `docker ps` Output
+- Docker Images
+
+### AWS
+- EC2 Instance Details
+- Security Group Rules
+
+### Deployment
+- Running Containers
+- Successful Application Access
 
 ---
 
-## 🔄 CI/CD Pipeline — Jenkins
+## 🔄 CI/CD Pipeline with Jenkins
 
-One of the primary goals of this project was to automate the software delivery process using Continuous Integration and Continuous Deployment. Jenkins was integrated to automatically build and deploy the application on every GitHub push, eliminating manual steps and ensuring consistent releases.
+One of the primary goals of this project was to automate the software delivery process using Continuous Integration and Continuous Deployment (CI/CD).
 
-### Traditional vs Automated Deployment
+Jenkins was integrated to automatically build and deploy the application whenever changes are pushed to the GitHub repository.
 
-| ❌ Traditional (Manual) | ✅ Automated (Jenkins) |
-|---|---|
-| Manual build on every change | Git push triggers pipeline automatically |
-| Prone to human errors | Consistent, scripted execution |
-| Time-consuming and repetitive | Fast delivery with zero manual intervention |
-| Inconsistent deployments | Repeatable and auditable releases |
+This eliminates manual deployment steps and ensures consistency across deployments.
+
+---
+
+### Why Jenkins?
+
+**Traditional Deployment Process:**
+
+```
+Developer
+    │
+    ▼
+Manual Build
+    │
+    ▼
+Manual Deployment
+    │
+    ▼
+Manual Verification
+```
+
+**Problems:**
+- Time consuming
+- Human errors
+- Inconsistent deployments
+- Difficult maintenance
+
+---
+
+**Automated Deployment Process:**
+
+```
+Developer
+    │
+    ▼
+Git Push
+    │
+    ▼
+GitHub Repository
+    │
+    ▼
+Jenkins Pipeline
+    │
+    ▼
+Build & Deploy
+    │
+    ▼
+Application Updated
+```
+
+**Benefits:**
+- Automated deployment
+- Faster delivery
+- Reduced human intervention
+- Consistent releases
+- Improved productivity
+
+---
 
 ### Jenkins Architecture
 
 ```
 GitHub Repository
-       │
-       ▼
-    Jenkins
-       │
-  ┌────┼──────────┐
-  │    │          │
-  ▼    ▼          ▼
-Build Deploy   Verify
-       │
-       ▼
-Docker Container
-       │
-       ▼
-AWS EC2 Server
+        │
+        ▼
+     Jenkins
+        │
+ ┌──────┼────────┐
+ │      │        │
+ ▼      ▼        ▼
+Build  Deploy  Verify
+        │
+        ▼
+ Docker Container
+        │
+        ▼
+ AWS EC2 Server
 ```
 
-### Jenkins Container Details
+---
+
+### Jenkins Deployment
+
+Jenkins was deployed as a Docker container on the AWS EC2 instance.
+
+**Container Details:**
 
 | Property | Value |
 |---|---|
 | Container Name | jenkins-container |
 | Image | jenkins/jenkins:lts |
 | Port Mapping | 8081:8080 |
+| Purpose | CI/CD Automation |
 
-**Access Jenkins:** `http://<EC2_PUBLIC_IP>:8081`
+---
 
-### Pipeline Stages
+### Jenkins Dashboard Access
 
 ```
-Git Push
-   │
-   ▼
-Stage 1 — Source Code Checkout
-   │       Fetches the latest commit from GitHub
-   ▼
-Stage 2 — Verify Environment
-   │       Confirms Docker availability: docker --version
-   ▼
-Stage 3 — Build Docker Image
-   │       docker build -t ai-study-buddy-pro .
-   ▼
-Stage 4 — Stop Existing Container
-   │       docker stop ai-study-buddy-container
-   ▼
-Stage 5 — Remove Old Container
-   │       docker rm ai-study-buddy-container
-   ▼
-Stage 6 — Deploy New Container
-   │       docker run -d -p 8501:8501 --env-file .env ai-study-buddy-pro
-   ▼
-Stage 7 — Verify Deployment
-   │       Confirms container running, port exposed, app reachable
-   ▼
-Application Live ✅
+http://<EC2_PUBLIC_IP>:8081
 ```
 
-### Useful Jenkins Commands
-
-```bash
-docker exec -it jenkins-container bash   # Access Jenkins container shell
-docker logs jenkins-container            # View Jenkins logs
-docker restart jenkins-container         # Restart Jenkins
+**Example:**
+```
+http://3.x.x.x:8081
 ```
 
 ---
 
-## 🏗 Infrastructure as Code — Terraform
+### Jenkins Pipeline Workflow
 
-All AWS infrastructure is defined and provisioned through Terraform, enabling repeatable, version-controlled deployments without touching the AWS console.
+The pipeline automates the complete deployment process.
 
-### Without vs With Terraform
+#### Stage 1 — Source Code Checkout
 
-| ❌ Without Terraform | ✅ With Terraform |
-|---|---|
-| Manual resource creation via AWS Console | `terraform apply` provisions everything |
-| Difficult to reproduce setup | Fully repeatable from version-controlled code |
-| Error-prone and time-consuming | Automated, consistent, and auditable |
+Retrieves the latest code from GitHub.
 
-### Folder Structure
+**Purpose:**
+- Fetch latest commit
+- Ensure latest version deployment
+
+---
+
+#### Stage 2 — Verify Environment
+
+Checks required tools and dependencies.
+
+**Example:**
+```bash
+docker --version
+```
+
+**Purpose:**
+- Verify Docker availability
+- Validate deployment environment
+
+---
+
+#### Stage 3 — Build Docker Image
+
+Builds application image.
+
+```bash
+docker build -t ai-study-buddy-pro .
+```
+
+**Output:**
+```
+Docker Image Created Successfully
+```
+
+---
+
+#### Stage 4 — Stop Existing Container
+
+Stops previously deployed container.
+
+```bash
+docker stop ai-study-buddy-container
+```
+
+---
+
+#### Stage 5 — Remove Existing Container
+
+Removes old container.
+
+```bash
+docker rm ai-study-buddy-container
+```
+
+---
+
+#### Stage 6 — Deploy New Container
+
+Launches latest application version.
+
+```bash
+docker run -d \
+  --name ai-study-buddy-container \
+  -p 8501:8501 \
+  --env-file .env \
+  ai-study-buddy-pro
+```
+
+---
+
+#### Stage 7 — Deployment Verification
+
+Verifies successful deployment.
+
+**Checks:**
+- Container running
+- Port exposed
+- Application accessible
+
+---
+
+### Jenkins Pipeline Flow
+
+```
+Code Push
+    │
+    ▼
+GitHub
+    │
+    ▼
+Jenkins Trigger
+    │
+    ▼
+Checkout Repository
+    │
+    ▼
+Build Docker Image
+    │
+    ▼
+Deploy Container
+    │
+    ▼
+Verify Deployment
+    │
+    ▼
+Application Live
+```
+
+---
+
+### Jenkins Commands Used
+
+**View Running Containers:**
+```bash
+docker ps
+```
+
+**Access Jenkins Container:**
+```bash
+docker exec -it jenkins-container bash
+```
+
+**View Jenkins Logs:**
+```bash
+docker logs jenkins-container
+```
+
+**Restart Jenkins:**
+```bash
+docker restart jenkins-container
+```
+
+---
+
+## 🏗️ Infrastructure as Code (Terraform)
+
+Infrastructure provisioning was automated using Terraform.
+
+Terraform allows infrastructure resources to be defined and managed through code instead of manual AWS configuration.
+
+---
+
+### Why Terraform?
+
+**Without Terraform:**
+
+```
+AWS Console
+     │
+Manual Resource Creation
+     │
+Manual Configuration
+```
+
+**Problems:**
+- Time consuming
+- Difficult to reproduce
+- Error prone
+
+---
+
+**With Terraform:**
+
+```
+Terraform Code
+        │
+        ▼
+terraform apply
+        │
+        ▼
+AWS Infrastructure
+```
+
+**Benefits:**
+- Automation
+- Repeatability
+- Version Control
+- Consistency
+
+---
+
+### Terraform Folder Structure
 
 ```
 terraform/
-├── provider.tf       # AWS provider configuration and deployment region
-├── main.tf           # EC2 instance, security groups, network resources
-├── variables.tf      # Reusable input variables (region, instance type, key pair)
-├── terraform.tfvars  # Actual variable values
-└── outputs.tf        # Displays public IP and instance info after deploy
+│
+├── provider.tf
+├── main.tf
+├── variables.tf
+├── outputs.tf
+└── terraform.tfvars
 ```
+
+---
+
+### Terraform Components
+
+#### provider.tf
+
+Responsible for AWS provider configuration.
+
+**Purpose:**
+- Connect Terraform to AWS
+- Configure deployment region
+
+---
+
+#### variables.tf
+
+Stores reusable variables.
+
+**Examples:**
+- Region
+- Instance Type
+- Key Pair Name
+
+---
+
+#### terraform.tfvars
+
+Contains actual values.
+
+**Examples:**
+```
+Region = ap-south-1
+Instance Type = t3.small
+```
+
+---
+
+#### main.tf
+
+Creates AWS resources.
+
+**Resources include:**
+- EC2 Instance
+- Security Groups
+- Network Configuration
+
+---
+
+#### outputs.tf
+
+Displays deployment information.
+
+**Examples:**
+- Public IP
+- Instance Details
+
+---
 
 ### Terraform Workflow
 
-```bash
-terraform init       # Initialize providers and backend
-terraform validate   # Check configuration syntax
-terraform plan       # Preview changes before applying
-terraform apply      # Provision AWS infrastructure
-terraform destroy    # Tear down all resources
+```
+Terraform Files
+       │
+       ▼
+terraform init
+       │
+       ▼
+terraform validate
+       │
+       ▼
+terraform plan
+       │
+       ▼
+terraform apply
+       │
+       ▼
+AWS Infrastructure
 ```
 
-### AWS Resources Provisioned
+---
+
+### Terraform Commands Used
+
+**Initialize:**
+```bash
+terraform init
+```
+
+**Validate:**
+```bash
+terraform validate
+```
+
+**Execution Plan:**
+```bash
+terraform plan
+```
+
+**Provision Resources:**
+```bash
+terraform apply
+```
+
+**Destroy Infrastructure:**
+```bash
+terraform destroy
+```
+
+---
+
+### AWS Infrastructure Provisioned
 
 | Resource | Details |
 |---|---|
@@ -602,98 +1113,265 @@ terraform destroy    # Tear down all resources
 | Compute Service | EC2 |
 | Instance Type | t3.small |
 | Region | ap-south-1 |
-| Operating System | Ubuntu 24.04 LTS |
+| OS | Ubuntu 24.04 LTS |
 
 ---
 
 ## ☸️ Kubernetes Configuration
 
-Kubernetes manifests were created to demonstrate production-grade container orchestration. The manifests were configured and tested locally while Docker-on-EC2 served as the primary deployment target.
+Kubernetes manifests were created to demonstrate container orchestration and production deployment readiness.
 
-### Folder Structure
+Although the primary deployment was Docker-based on AWS EC2, Kubernetes resources were configured and tested locally.
+
+---
+
+### Kubernetes Folder Structure
 
 ```
 kubernetes/
-├── namespace.yaml    # Isolates resources in a dedicated namespace
-├── configmap.yaml    # Stores non-sensitive application configuration
-├── secret.yaml       # Stores sensitive values: API keys, tokens, credentials
-├── deployment.yaml   # Manages pod creation, replicas, and rolling updates
-└── service.yaml      # Exposes the app with stable endpoints and load balancing
+│
+├── namespace.yaml
+├── configmap.yaml
+├── secret.yaml
+├── deployment.yaml
+└── service.yaml
 ```
+
+---
+
+### Kubernetes Resources
+
+#### Namespace
+
+Provides resource isolation.
+
+**File:**
+```
+namespace.yaml
+```
+
+---
+
+#### ConfigMap
+
+Stores application configuration.
+
+**File:**
+```
+configmap.yaml
+```
+
+---
+
+#### Secret
+
+Stores sensitive values.
+
+**File:**
+```
+secret.yaml
+```
+
+**Examples:**
+- API Keys
+- Tokens
+- Credentials
+
+---
+
+#### Deployment
+
+Manages application Pods.
+
+**File:**
+```
+deployment.yaml
+```
+
+**Responsibilities:**
+- Pod creation
+- Replica management
+- Rolling updates
+
+---
+
+#### Service
+
+Exposes application to users.
+
+**File:**
+```
+service.yaml
+```
+
+**Responsibilities:**
+- Stable endpoint
+- Internal communication
+- Load balancing
+
+---
 
 ### Kubernetes Architecture
 
 ```
 Namespace
-    │
-    ▼
+     │
+     ▼
 Deployment
-    │
-    ▼
-   Pods
-    │
-    ▼
+     │
+     ▼
+Pods
+     │
+     ▼
 Service
-    │
-    ▼
- Users
+     │
+     ▼
+Users
 ```
 
-### Common kubectl Commands
+---
 
+### Kubernetes Commands Used
+
+**Check Nodes:**
 ```bash
-# Inspect cluster resources
 kubectl get nodes
-kubectl get pods
-kubectl get deployments
-kubectl get services
+```
 
-# Apply manifests
+**Check Pods:**
+```bash
+kubectl get pods
+```
+
+**Check Deployments:**
+```bash
+kubectl get deployments
+```
+
+**Check Services:**
+```bash
+kubectl get services
+```
+
+**Apply Namespace:**
+```bash
 kubectl apply -f namespace.yaml
+```
+
+**Apply Deployment:**
+```bash
 kubectl apply -f deployment.yaml
+```
+
+**Apply Service:**
+```bash
 kubectl apply -f service.yaml
 ```
 
 ---
 
+## 📸 Screenshots to Include
+
+### Jenkins
+- Jenkins Dashboard
+- Successful Build
+- Pipeline Stages
+
+### Terraform
+- `terraform apply` Output
+- AWS EC2 Instance Dashboard
+
+### Kubernetes
+- `kubectl get nodes`
+- `kubectl get deployments`
+- `kubectl get services`
+
+### Docker
+
+`docker ps` Output showing:
+- ai-study-buddy-container
+- jenkins-container
+- prometheus-container
+- grafana-container
+- node-exporter
+
+---
+
 ## 📊 Monitoring & Observability
 
-Monitoring is a critical component of modern DevOps. After deployment, applications and infrastructure must be continuously observed for reliability, performance, and availability. This project implements a full monitoring stack using **Prometheus**, **Node Exporter**, and **Grafana**.
+Monitoring is a critical component of modern DevOps practices. After deployment, applications and infrastructure must be continuously monitored to ensure reliability, performance, and availability.
 
-### Why Monitoring?
+For this project, a complete monitoring stack was implemented using:
 
-| Infrastructure Questions | Application Questions | Performance Questions |
-|---|---|---|
-| Is CPU usage increasing? | Is the application running? | Resource utilization trends |
-| Is memory sufficient? | Are containers healthy? | System bottlenecks |
-| Is disk space running low? | Are services reachable? | Capacity planning |
-| Is network traffic normal? | | |
+- **Prometheus**
+- **Grafana**
+- **Node Exporter**
+
+These tools provide real-time visibility into system performance and application health.
+
+---
 
 ### Monitoring Architecture
 
 ```
 AWS EC2 (t3.small)
-       │
-       ▼
- Node Exporter         ← Collects Linux system-level metrics
-       │
-       ▼
-  Prometheus           ← Stores and queries time-series data
-       │
-       ▼
-   Grafana             ← Visualizes metrics on interactive dashboards
-       │
-       ▼
-Monitoring Dashboard
+        │
+        ▼
+  Node Exporter
+        │
+        ▼
+   Prometheus
+        │
+        ▼
+    Grafana
+        │
+        ▼
+ Monitoring Dashboard
 ```
 
 ---
 
-### 📈 Prometheus
+### Why Monitoring?
 
-Prometheus is the central metrics collection system responsible for scraping, storing, and querying time-series data from all configured targets.
+Monitoring helps answer important operational questions:
 
-**Responsibilities:** Metrics collection · Time-series storage · Target monitoring · Query processing · Grafana integration
+**Infrastructure Monitoring**
+- Is CPU usage increasing?
+- Is memory sufficient?
+- Is disk space running low?
+- Is network traffic normal?
+
+**Application Monitoring**
+- Is the application running?
+- Are containers healthy?
+- Are services reachable?
+
+**Performance Analysis**
+- Resource utilization trends
+- System bottlenecks
+- Capacity planning
+
+---
+
+## 📈 Prometheus
+
+Prometheus is an open-source monitoring and alerting toolkit used for collecting and storing metrics.
+
+In this project, Prometheus acts as the central metrics collection system.
+
+---
+
+### Prometheus Responsibilities
+
+- Metrics Collection
+- Time-Series Data Storage
+- Target Monitoring
+- Query Processing
+- Integration with Grafana
+
+---
+
+### Prometheus Container
 
 | Property | Value |
 |---|---|
@@ -701,12 +1379,29 @@ Prometheus is the central metrics collection system responsible for scraping, st
 | Image | prom/prometheus |
 | Port | 9090 |
 
-**Access:** `http://<EC2_PUBLIC_IP>:9090`
+**Access URL:**
+```
+http://<EC2_PUBLIC_IP>:9090
+```
 
-**Configuration** (`monitoring/prometheus/prometheus.yml`):
+---
 
+### Prometheus Configuration
+
+**Configuration File:**
+```
+monitoring/prometheus/prometheus.yml
+```
+
+The configuration defines:
+- Scrape intervals
+- Target endpoints
+- Monitoring jobs
+
+**Example Targets:**
 ```yaml
 scrape_configs:
+
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
@@ -716,26 +1411,43 @@ scrape_configs:
       - targets: ['node-exporter:9100']
 ```
 
-**Monitored Targets:**
+---
+
+### Target Monitoring
 
 | Target | Purpose |
 |---|---|
-| localhost:9090 | Prometheus self-monitoring |
-| node-exporter:9100 | System metrics collection |
+| localhost:9090 | Prometheus Self Monitoring |
+| node-exporter:9100 | System Metrics Collection |
 
-**Useful PromQL Queries:**
+---
 
+### Useful Prometheus Queries
+
+**Check Target Status:**
 ```promql
-up                                      # Target health status
-rate(node_cpu_seconds_total[5m])        # CPU usage rate
-node_memory_MemAvailable_bytes          # Available memory
+up
+```
+
+**CPU Metrics:**
+```promql
+rate(node_cpu_seconds_total[5m])
+```
+
+**Memory Metrics:**
+```promql
+node_memory_MemAvailable_bytes
 ```
 
 ---
 
-### 📡 Node Exporter
+## 📡 Node Exporter
 
-Node Exporter exposes Linux system-level metrics to Prometheus.
+Node Exporter exposes Linux system metrics to Prometheus.
+
+---
+
+### Node Exporter Container
 
 | Property | Value |
 |---|---|
@@ -743,23 +1455,41 @@ Node Exporter exposes Linux system-level metrics to Prometheus.
 | Image | prom/node-exporter |
 | Port | 9100 |
 
-**Metrics Collected:**
+---
 
-| Category | Metrics |
-|---|---|
-| CPU | Utilization, load, time per core |
-| Memory | Used, available, cached RAM |
-| Disk | Usage, free space, filesystem info |
-| Network | Incoming/outgoing traffic, interface stats |
+### Metrics Collected
 
-**Verify Node Exporter metrics:**
+**CPU Metrics**
+- CPU Utilization
+- CPU Load
+- CPU Time
 
+**Memory Metrics**
+- RAM Usage
+- Available Memory
+- Cached Memory
+
+**Disk Metrics**
+- Disk Utilization
+- Free Space
+- Filesystem Information
+
+**Network Metrics**
+- Incoming Traffic
+- Outgoing Traffic
+- Interface Statistics
+
+---
+
+### Node Exporter Verification
+
+**Verify metrics:**
 ```bash
 docker exec -it prometheus-container \
   wget -qO- http://node-exporter:9100/metrics
 ```
 
-Expected output:
+**Expected Output:**
 ```
 # HELP go_gc_duration_seconds
 # TYPE go_gc_duration_seconds summary
@@ -768,9 +1498,15 @@ Expected output:
 
 ---
 
-### 📊 Grafana
+## 📊 Grafana
 
-Grafana retrieves data from Prometheus and presents it through interactive, real-time dashboards.
+Grafana is an open-source analytics and visualization platform used to display monitoring metrics.
+
+Grafana retrieves data from Prometheus and presents it through interactive dashboards.
+
+---
+
+### Grafana Container
 
 | Property | Value |
 |---|---|
@@ -778,118 +1514,342 @@ Grafana retrieves data from Prometheus and presents it through interactive, real
 | Image | grafana/grafana |
 | Port | 3000 |
 
-**Access:** `http://<EC2_PUBLIC_IP>:3000`
-
-**Dashboard Panels:**
-
-| Panel | Metrics Shown |
-|---|---|
-| CPU Monitoring | Utilization, load, historical trends |
-| Memory Monitoring | Used memory, available memory, trends |
-| Disk Monitoring | Usage, free space, filesystem health |
-| Network Monitoring | Throughput, interface statistics |
-| System Health | Host status, uptime, resource availability |
+**Access URL:**
+```
+http://<EC2_PUBLIC_IP>:3000
+```
 
 ---
 
-### All Containers at a Glance
+### Grafana Dashboard Features
+
+The monitoring dashboard provides:
+
+**CPU Monitoring**
+- CPU Utilization
+- CPU Load
+- Historical Trends
+
+**Memory Monitoring**
+- Used Memory
+- Available Memory
+- Memory Trends
+
+**Disk Monitoring**
+- Disk Usage
+- Free Space
+- Filesystem Health
+
+**Network Monitoring**
+- Network Throughput
+- Interface Statistics
+
+**System Health**
+- Host Status
+- Uptime
+- Resource Availability
+
+---
+
+### Monitoring Stack Summary
+
+| Component | Purpose |
+|---|---|
+| Node Exporter | Collect System Metrics |
+| Prometheus | Store Metrics |
+| Grafana | Visualize Metrics |
+
+---
+
+## 🐳 Containers Used in Project
+
+The following containers were deployed during project implementation.
 
 | Container Name | Purpose |
 |---|---|
 | ai-study-buddy-container | Main Application |
 | jenkins-container | CI/CD Pipeline |
-| prometheus-container | Metrics Storage & Querying |
-| grafana-container | Dashboard Visualization |
+| prometheus-container | Monitoring |
+| grafana-container | Visualization |
 | node-exporter | Infrastructure Metrics |
-
-### Docker Network Configuration
-
-Container-to-container communication is enabled through Docker networking, allowing Prometheus to reach Node Exporter and Grafana to query Prometheus.
-
-```bash
-docker network ls                        # List all Docker networks
-docker network inspect bridge            # Inspect network details
-```
 
 ---
 
-## ⚠️ Challenges & Solutions
+### Docker Network Configuration
 
-Real-world deployments always surface unexpected issues. Here are the key challenges encountered during this project and how each was resolved:
+Container communication was enabled through Docker networking.
 
-| # | Challenge | Root Cause | Solution | Result |
-|---|---|---|---|---|
-| 1 | Jenkins build failure — `.env not found` | Missing env file in Jenkins workspace | Created `.env` in deployment environment, updated config | Successful build and deployment |
-| 2 | Docker container name conflict | Existing container using identical name | Ran `docker stop` + `docker rm` before redeploying | Container recreated successfully |
-| 3 | Prometheus target showing `DOWN` | Network communication failure between containers | Verified Docker network, updated Prometheus config, restarted monitoring containers | Target status changed to `UP` |
-| 4 | Grafana showing `No Data` | Prometheus datasource misconfigured | Verified datasource URL, tested connectivity, reloaded dashboards | Metrics displayed correctly |
-| 5 | `kubectl get pods` returning no resources | Manifests had not been applied to the cluster | Applied manifests with `kubectl apply -f deployment.yaml` | Resources created successfully |
+**List Networks:**
+```bash
+docker network ls
+```
+
+**Inspect Network:**
+```bash
+docker network inspect bridge
+```
+
+**Purpose:**
+- Prometheus ↔ Node Exporter Communication
+- Grafana ↔ Prometheus Communication
+- Service Discovery
+
+---
+
+## ⚠️ Challenges Faced During Development
+
+Real-world projects often encounter deployment and configuration challenges.
+
+Several issues were encountered and resolved during implementation.
+
+---
+
+### Challenge 1 — Jenkins Build Failure
+
+**Issue:**
+```
+.env file not found
+```
+
+**Cause:**
+Jenkins workspace did not contain required environment variables.
+
+**Solution:**
+- Created `.env` file in deployment environment
+- Updated deployment configuration
+
+**Result:**
+Successful build and deployment.
+
+---
+
+### Challenge 2 — Docker Container Conflict
+
+**Issue:**
+```
+Container name already in use
+```
+
+**Cause:**
+Existing container with identical name.
+
+**Solution:**
+```bash
+docker stop container-name
+docker rm container-name
+```
+
+**Result:**
+Container recreated successfully.
+
+---
+
+### Challenge 3 — Prometheus Target DOWN
+
+**Issue:**
+Node Exporter target showing DOWN.
+
+**Cause:**
+Network communication issue between containers.
+
+**Solution:**
+- Verified Docker network
+- Updated Prometheus configuration
+- Restarted monitoring containers
+
+**Result:**
+Target status changed to UP.
+
+---
+
+### Challenge 4 — Grafana No Data
+
+**Issue:**
+Dashboard displaying:
+```
+No Data
+```
+
+**Cause:**
+Prometheus datasource misconfiguration.
+
+**Solution:**
+- Verified datasource URL
+- Tested Prometheus connectivity
+- Reloaded dashboards
+
+**Result:**
+Metrics displayed correctly.
+
+---
+
+### Challenge 5 — Kubernetes Resources Not Visible
+
+**Issue:**
+```bash
+kubectl get pods
+```
+
+**Output:**
+```
+No resources found
+```
+
+**Cause:**
+Manifests had not been applied.
+
+**Solution:**
+```bash
+kubectl apply -f deployment.yaml
+```
+
+**Result:**
+Resources created successfully.
 
 ---
 
 ## 🏆 Project Outcomes
 
+The project successfully achieved all planned objectives.
+
+---
+
+### Application Outcomes
+
+- ✅ AI Study Buddy Application Developed
+- ✅ Interactive Streamlit Interface
+- ✅ Cloud Deployment Successful
+
+### DevOps Outcomes
+
+- ✅ Git & GitHub Integration
+- ✅ Docker Containerization
+- ✅ Jenkins CI/CD Automation
+- ✅ Terraform Infrastructure Provisioning
+- ✅ Kubernetes Configuration
+
+### Monitoring Outcomes
+
+- ✅ Prometheus Operational
+- ✅ Node Exporter Metrics Collection
+- ✅ Grafana Dashboard Visualization
+- ✅ Real-Time Monitoring Enabled
+
+---
+
+## 📸 Screenshots Section
+
+Add screenshots for:
+
 ### Application
-- ✅ AI Study Buddy application developed and deployed
-- ✅ Interactive Streamlit interface live on AWS
+- Home Page
+- User Interface
 
-### DevOps
-- ✅ Git & GitHub version control integrated
-- ✅ Docker containerization complete
-- ✅ Jenkins CI/CD pipeline operational
-- ✅ Terraform infrastructure provisioning automated
-- ✅ Kubernetes manifests configured and tested
+### AWS
+- EC2 Dashboard
+- Security Group Configuration
 
-### Monitoring
-- ✅ Prometheus collecting metrics from all targets
-- ✅ Node Exporter exposing system-level infrastructure data
-- ✅ Grafana dashboards live with real-time visualization
+### Docker
+- `docker ps` Output
+- Running Containers
+
+### Jenkins
+- Jenkins Dashboard
+- Successful Build
+
+### Terraform
+- `terraform apply` Output
+
+### Kubernetes
+- `kubectl get nodes`
+- `kubectl get deployments`
+- `kubectl get services`
+
+### Prometheus
+- Target Status Page
+- Metrics Queries
+
+### Grafana
+- Node Exporter Dashboard
+- System Monitoring Dashboard
 
 ---
 
 ## 🚀 Future Enhancements
 
+The project can be extended with:
+
 ### Application Improvements
-- User authentication and session management
-- Learning analytics and progress tracking
-- AI chatbot integration for conversational tutoring
+- User Authentication
+- Learning Analytics
+- Progress Tracking
+- AI Chatbot Integration
 
 ### DevOps Enhancements
-- GitHub Actions as an alternative CI pipeline
-- SonarQube for static code quality analysis
-- Automated test suite with coverage reporting
-- Private container registry integration
+- GitHub Actions
+- SonarQube Integration
+- Automated Testing
+- Container Registry Integration
 
 ### Cloud Enhancements
-- Migration to AWS ECS or Amazon EKS
-- Application Load Balancer + Auto Scaling Groups
-- Multi-region deployment for high availability
+- AWS ECS
+- Amazon EKS
+- Application Load Balancer
+- Auto Scaling Groups
 
 ### Monitoring Enhancements
-- AlertManager with email and Slack notifications
-- Centralized logging (ELK stack / Grafana Loki)
-- Uptime and SLA dashboards
+- AlertManager
+- Email Notifications
+- Slack Alerts
+- Centralized Logging
 
 ---
 
 ## 👨‍💻 Author
 
-**Rahul Tyagi** — Computer Science Student · DevOps Enthusiast · Cloud Learner
+**Rahul Tyagi**
 
-**Skills demonstrated:** Python · Streamlit · Git & GitHub · Docker · Docker Compose · Jenkins · Terraform · Kubernetes · AWS EC2 · Prometheus · Grafana · Linux Administration
+*Computer Science Student | DevOps Enthusiast | Cloud Learner*
+
+### Skills Demonstrated
+
+`Python` `Streamlit` `Git & GitHub` `Docker` `Docker Compose` `Jenkins` `Terraform` `Kubernetes` `AWS EC2` `Prometheus` `Grafana` `Linux Administration`
 
 ---
 
 ## 📄 License
 
-This project was developed for academic learning, DevOps practice, cloud computing demonstration, and portfolio development. Feel free to explore, learn from, and extend it.
+This project is developed for:
+
+- Academic Learning
+- DevOps Practice
+- Cloud Computing Demonstration
+- Portfolio Development
+
+Feel free to explore, learn, and extend the project.
+
+---
+
+## ⭐ Support
+
+If you found this project useful:
+
+- ⭐ **Star** the repository
+- 🍴 **Fork** the project
+- 📢 **Share** it with others
+
+---
+
+## 🎯 Conclusion
+
+AI Study Buddy demonstrates the complete software delivery lifecycle using modern DevOps tools and practices. The project integrates application development, cloud deployment, automation, infrastructure provisioning, container orchestration, and monitoring into a single end-to-end solution.
+
+By combining **Python**, **Streamlit**, **Docker**, **Jenkins**, **Terraform**, **Kubernetes**, **AWS**, **Prometheus**, **Grafana**, and **Node Exporter**, the project showcases practical implementation of industry-standard DevOps workflows and serves as a strong academic and professional portfolio project.
 
 ---
 
 <div align="center">
 
-**If this project was useful, consider giving it a ⭐ — it helps others discover it too.**
-
-[⭐ Star this repo](https://github.com/the-rahul-tyagi/AiStudyBuddyPro) · [🍴 Fork it](https://github.com/the-rahul-tyagi/AiStudyBuddyPro/fork) · [📢 Share it](https://github.com/the-rahul-tyagi/AiStudyBuddyPro)
+Made with ❤️ by **Rahul Tyagi**
 
 </div>
