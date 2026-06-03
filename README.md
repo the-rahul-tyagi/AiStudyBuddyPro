@@ -268,8 +268,7 @@ pip install -r requirements.txt
 Create a `.env` file at `AI_STUDY_BUDDY_PRO/.env`:
 
 ```env
-OPENAI_API_KEY=your_api_key_here
-APP_ENV=development
+GEMINI_API_KEY=your_api_key_here
 ```
 
 > **Why environment variables?** They secure sensitive information, separate configuration from code, and support multiple deployment environments without code changes.
