@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 AI Study Buddy Pro
+# 🎓 AI Study Buddy
 
 **An AI-Powered Personalized Learning Platform with End-to-End DevOps Automation**
 
@@ -30,7 +30,7 @@
 
 ## 📖 Overview
 
-**AI Study Buddy Pro** is a cloud-native educational platform that delivers personalized learning assistance through an intelligent AI interface. Beyond the application itself, this project is a complete showcase of modern DevOps practices — covering Infrastructure as Code, CI/CD automation, containerization, Kubernetes orchestration, and real-time observability.
+**AI Study Buddy** is a cloud-native educational platform that delivers personalized learning assistance through an intelligent AI interface. Beyond the application itself, this project is a complete showcase of modern DevOps practices — covering Infrastructure as Code, CI/CD automation, containerization, Kubernetes orchestration, and real-time observability.
 
 This project serves dual purposes:
 
